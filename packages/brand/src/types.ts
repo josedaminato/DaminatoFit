@@ -34,11 +34,14 @@ export interface BrandConfig {
   ios: { bundleIdentifier: string };
   android: { package: string };
   colors: { light: ColorPalette; dark: ColorPalette };
-  /** `null` until the legal and support pages exist. */
+  /** `null` until the legal pages exist. Support can be a mailto before a public page exists. */
   links: {
     privacyPolicy: string | null;
     terms: string | null;
     support: string | null;
+    supportEmail: string | null;
+    /** E.164. Argentine mobiles include the 9 after the country code. */
+    supportPhoneE164: string | null;
   };
   distribution: Distribution;
   authRealm: RealmId;

@@ -35,7 +35,7 @@ Para las recomendaciones de un entrenador ya existe una denuncia (fraudulenta, e
 
 - Denunciar un aviso o un mensaje.
 - Bloquear a un entrenador desde el alumno más allá de dejar de usar el espacio.
-- Un contacto público del responsable de la app para esos reportes.
+- Un contacto público del responsable de PupiApp. El de DaminatoFit es info@daminatofit.com y WhatsApp +54 9 11 2765-4198.
 
 Hasta eso, no conviene presentar las fichas como listas.
 

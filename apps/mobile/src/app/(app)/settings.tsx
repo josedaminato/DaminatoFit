@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Alert, StyleSheet, Text, View } from 'react-native';
 import { useBrand } from '@/brand/BrandProvider';
 import { ApiStatus } from '@/features/health/ApiStatus';
+import { SupportContact } from '@/features/support/SupportContact';
 import { useSession } from '@/lib/session';
 import { getApiUrl } from '@/lib/api';
 import { fetchJson } from '@/lib/api-client';
@@ -85,6 +86,7 @@ export default function SettingsScreen() {
           <Button label="Mi perfil de entrenador" variant="secondary" onPress={() => undefined} />
         </Link>
       ) : null}
+      <SupportContact />
       <Text style={{ color: colors.textMuted, fontSize: 14 }}>{brand.displayName}</Text>
       <Button label="Cerrar sesión" variant="secondary" onPress={() => void onSignOut()} />
 

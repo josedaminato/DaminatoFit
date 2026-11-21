@@ -33,6 +33,15 @@ describe('brand registry', () => {
     expect(brand.android.package).toMatch(/^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)+$/);
   });
 
+  it('publishes the DaminatoFit support contact and leaves PupiApp without one', () => {
+    expect(brands.daminatofit.links).toMatchObject({
+      supportEmail: 'info@daminatofit.com',
+      supportPhoneE164: '+5491127654198',
+    });
+    expect(brands.pupiapp.links.supportEmail).toBeNull();
+    expect(brands.pupiapp.links.supportPhoneE164).toBeNull();
+  });
+
   it('keeps PupiApp closed to new trainers and DaminatoFit open', () => {
     expect(brands.pupiapp.trainerSignup).toBe('closed');
     expect(brands.daminatofit.trainerSignup).toBe('open');
