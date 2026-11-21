@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
+import { Link } from 'expo-router';
 import { useBrand } from '@/brand/BrandProvider';
 import { fetchJson } from '@/lib/api-client';
 import { useSession } from '@/lib/session';
@@ -109,8 +110,13 @@ export default function TrainerStudentsScreen() {
         }
         renderItem={({ item }) => (
           <View style={[styles.row, { borderColor: colors.border }]}>
-            <Text style={{ color: colors.text, fontWeight: '600' }}>{item.display_name}</Text>
-            <Text style={{ color: colors.textMuted }}>{item.status}</Text>
+            <View style={{ flex: 1, gap: 4 }}>
+              <Text style={{ color: colors.text, fontWeight: '600' }}>{item.display_name}</Text>
+              <Text style={{ color: colors.textMuted }}>{item.status}</Text>
+            </View>
+            <Link href={`/trainer/students/${item.membership_id}/workouts`} asChild>
+              <Button label="Entrenamientos" variant="secondary" onPress={() => undefined} />
+            </Link>
           </View>
         )}
       />

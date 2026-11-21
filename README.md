@@ -16,6 +16,7 @@ Plataforma móvil para entrenadores personales y alumnos. Una sola base de códi
 | 2.1 Cierre (reset + borrado de cuenta)  | Completada |
 | 3 Biblioteca y videos                   | Completada |
 | 4 Rutinas versionadas                   | Completada |
+| 5 Entrenamientos y progreso             | Completada |
 
 ## Requisitos
 
@@ -64,9 +65,15 @@ pnpm mobile:daminatofit   # o: pnpm mobile:pupiapp
 
 - Plantillas versionadas, borrador/publicación, días con `week_index`, series prescritas.
 - Asignación a varios alumnos; personalización individual sin afectar al resto; historial al reemplazar.
-- Alumno: consulta de rutina vigente (sin registro de series — Fase 5).
 - Detalle: [`docs/fase-4-rutinas.md`](./docs/fase-4-rutinas.md).
-- **Emulador/dispositivo:** no verificado en esta máquina; API + PostgreSQL reales en la suite de integración.
+
+## Fase 5 — entrenamientos y progreso
+
+- Sesión de gimnasio: series reales vs prescritas, temporizador por deadline, finalizar/abandonar.
+- Offline: SQLite local + `POST /v1/workouts/sync` idempotente (`client_id`); sesión fijada a la versión iniciada.
+- Historial y progreso (volumen, pesos, cumplimiento) para alumno y entrenador.
+- Detalle: [`docs/fase-5-entrenamientos-offline.md`](./docs/fase-5-entrenamientos-offline.md).
+- **Emulador/dispositivo:** no verificado en esta máquina; integración API + PostgreSQL reales.
 
 ## Comandos
 

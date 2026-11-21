@@ -12,6 +12,8 @@ import { meRoutes } from './modules/me/me.routes';
 import { exercisesRoutes } from './modules/exercises/exercises.routes';
 import { mediaRoutes } from './modules/media/media.routes';
 import { routinesRoutes } from './modules/routines/routines.routes';
+import { progressRoutes } from './modules/workouts/progress.routes';
+import { workoutsRoutes } from './modules/workouts/workouts.routes';
 import { trainersRoutes } from './modules/trainers/trainers.routes';
 
 export interface AppResources {
@@ -80,6 +82,15 @@ export async function buildApp(
     auths,
     appSql: appDb.sql,
     migratorSql: migrator.sql,
+  });
+  await app.register(workoutsRoutes, {
+    auths,
+    appSql: appDb.sql,
+    migratorSql: migrator.sql,
+  });
+  await app.register(progressRoutes, {
+    auths,
+    appSql: appDb.sql,
   });
 
   app.addHook('onClose', async () => {

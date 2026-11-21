@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { Link, useLocalSearchParams } from 'expo-router';
+import { Link, useLocalSearchParams, type Href } from 'expo-router';
 import { useBrand } from '@/brand/BrandProvider';
 import { ExerciseVideo } from '@/features/exercises/ExerciseVideo';
 import { getStudentRoutine } from '@/features/routines/routine-api';
@@ -86,6 +86,18 @@ export default function StudentRoutineDetailScreen() {
               {day.notes ? (
                 <Text style={{ color: colors.textMuted, fontSize: 14 }}>{day.notes}</Text>
               ) : null}
+
+              <Link
+                href={
+                  {
+                    pathname: '/student/workout/session',
+                    params: { planId: routineId, dayId: day.id },
+                  } as Href
+                }
+                asChild
+              >
+                <Button label="Entrenar" onPress={() => undefined} />
+              </Link>
 
               {[...day.exercises]
                 .sort((a, b) => a.position - b.position)

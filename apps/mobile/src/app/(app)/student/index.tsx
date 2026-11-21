@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'expo-router';
+import { Link, type Href } from 'expo-router';
 import { StyleSheet, Text, View } from 'react-native';
 import { useBrand } from '@/brand/BrandProvider';
 import { listStudentRoutines } from '@/features/routines/routine-api';
 import type { StudentRoutineListItem } from '@/features/routines/types';
+import { getActiveLocalSession } from '@/features/workouts/local-db';
+import { getActiveWorkoutSession } from '@/features/workouts/workout-api';
 import { useSession } from '@/lib/session';
 import { Screen } from '@/ui/Screen';
 import { Button } from '@/ui/Button';
@@ -16,6 +18,8 @@ export default function StudentHomeScreen() {
   const [routines, setRoutines] = useState<StudentRoutineListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [activePlanId, setActivePlanId] = useState<string | null>(null);
+  const [activeDayId, setActiveDayId] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -37,6 +41,30 @@ export default function StudentHomeScreen() {
       cancelled = true;
     };
   }, [apiContext]);
+
+  useEffect(() => {
+    if (!activeMembership) return;
+    let cancelled = false;
+    void (async () => {
+      const local = await getActiveLocalSession(activeMembership.id, activeMembership.tenantId);
+      if (local && !cancelled) {
+        setActiveDayId(local.day_id);
+        setActivePlanId(routines[0]?.id ?? null);
+      }
+      try {
+        const remote = await getActiveWorkoutSession(apiContext);
+        if (!cancelled && remote.active) {
+          setActiveDayId(remote.active.session.routineVersionDayId);
+          setActivePlanId(routines[0]?.id ?? null);
+        }
+      } catch {
+        // offline
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [activeMembership, apiContext, routines]);
 
   const primary = routines[0] ?? null;
 
@@ -75,6 +103,25 @@ export default function StudentHomeScreen() {
       )}
 
       <View style={styles.actions}>
+        {activeDayId && activePlanId ? (
+          <Link
+            href={
+              {
+                pathname: '/student/workout/session',
+                params: { planId: activePlanId, dayId: activeDayId },
+              } as Href
+            }
+            asChild
+          >
+            <Button label="Continuar entrenamiento" onPress={() => undefined} />
+          </Link>
+        ) : null}
+        <Link href="/student/history" asChild>
+          <Button label="Historial" variant="secondary" onPress={() => undefined} />
+        </Link>
+        <Link href="/student/progress" asChild>
+          <Button label="Progreso" variant="secondary" onPress={() => undefined} />
+        </Link>
         <Link href="/student/contact" asChild>
           <Button label="Contactar entrenador" onPress={() => undefined} />
         </Link>
