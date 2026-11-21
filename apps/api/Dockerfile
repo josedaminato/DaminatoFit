@@ -1,12 +1,12 @@
 # Build context: repository root (see infra/docker/compose.yml).
-FROM node:22-alpine AS build
+FROM node:26-alpine AS build
 WORKDIR /repo
 RUN corepack enable
 COPY . .
 RUN pnpm install --frozen-lockfile --filter "@daminatofit/api..." \
   && pnpm --filter @daminatofit/api build
 
-FROM node:22-alpine AS runtime
+FROM node:26-alpine AS runtime
 ARG APP_VERSION=dev
 ENV NODE_ENV=production \
     APP_VERSION=${APP_VERSION}
