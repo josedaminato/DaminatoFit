@@ -9,6 +9,9 @@ describe('loadEnv', () => {
       API_PORT: 3000,
       LOG_LEVEL: 'info',
       APP_VERSION: 'dev',
+      DATABASE_URL: undefined,
+      DATABASE_URL_APP: undefined,
+      DATABASE_URL_ADMIN: undefined,
     });
   });
 

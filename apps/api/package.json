@@ -7,17 +7,21 @@
     "dev": "tsx watch --env-file-if-exists=../../.env src/server.ts",
     "build": "tsup",
     "start": "node dist/server.cjs",
+    "db:migrate": "tsx --env-file-if-exists=../../.env src/db/migrate.ts",
     "typecheck": "tsc -p tsconfig.json",
-    "test": "vitest run"
+    "test": "node --env-file-if-exists=../../.env ../../node_modules/vitest/vitest.mjs run"
   },
   "dependencies": {
     "@daminatofit/contracts": "workspace:*",
+    "drizzle-orm": "^0.45.4",
     "fastify": "^5.12.8",
+    "postgres": "^4.1.1",
     "zod": "^4.6.7"
   },
   "devDependencies": {
     "@daminatofit/config": "workspace:*",
     "@types/node": "^22.19.0",
+    "drizzle-kit": "^0.31.11",
     "tsup": "^9.0.0",
     "tsx": "^4.23.15",
     "vitest": "^5.1.1"
