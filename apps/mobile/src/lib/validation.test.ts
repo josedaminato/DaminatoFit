@@ -1,4 +1,4 @@
-import { isValidEmail, isValidPassword, validationMessage } from './validation';
+import { isValidEmail, isValidPassword, passwordsMatch, validationMessage } from './validation';
 
 describe('validation', () => {
   it('validates email format', () => {
@@ -11,5 +11,10 @@ describe('validation', () => {
     expect(isValidPassword('short')).toBe(false);
     expect(isValidPassword('longenough')).toBe(true);
     expect(validationMessage('password', '123')).toMatch(/8/);
+  });
+
+  it('checks password confirmation', () => {
+    expect(passwordsMatch('password123', 'password123')).toBe(true);
+    expect(passwordsMatch('password123', 'password999')).toBe(false);
   });
 });

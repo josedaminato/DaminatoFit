@@ -29,7 +29,8 @@ export async function buildApp(
   const appDb = resources?.appDb ?? createDb(appDatabaseUrl);
   const resolved: AppResources = { migrator, appDb };
 
-  const auths = createAuthRealms(migrator.db, env);
+  // Domain soft-delete runs as migrator inside Better Auth beforeDelete (SECURITY DEFINER).
+  const auths = createAuthRealms(migrator.db, env, migrator.sql);
 
   const app = Fastify({
     logger: env.LOG_LEVEL === 'silent' ? false : { level: env.LOG_LEVEL },

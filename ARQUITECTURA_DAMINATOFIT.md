@@ -1,7 +1,7 @@
 # Arquitectura DaminatoFit / PupiApp
 
 > **Versión:** revisión 2 (21/11/2026). Reemplaza la versión aprobada el mismo día; los cambios están resumidos en la sección 10.
-> **Estado del código:** Fases **0**, **0.1**, **1** y **2** implementadas localmente. Fase 3 pendiente de aprobación.
+> **Estado del código:** Fases **0**, **0.1**, **1**, **2** y **2.1** (cierre: reset, borrado de cuenta) implementadas localmente. Fase 3 pendiente de aprobación.
 > **Convención del documento:** cada afirmación sobre terceros (precios, políticas de tiendas, librerías) indica si fue **verificada** en la fuente el 21/11/2026 o si es una **estimación**. Las reglas comerciales se marcan como **definidas** o **pendientes**.
 
 ---
@@ -639,6 +639,7 @@ Cada fase termina con: pruebas en verde, migraciones aplicables desde cero, crit
 | **0.1 Alineación** (menor) ✅           | `distribution`, `authRealm` y `maxTenants` en marcas; ADR 0002 reemplazado; gitleaks, Dependabot y `pnpm audit` en CI; ADR 0003 de infraestructura.           | Pruebas de marca actualizadas; CI con controles de seguridad.                                                       |
 | **1. Datos, tenants y RLS** ✅          | Roles `app_*`, esquema de identidad + avisos/mensajes/catálogo global, `tenant-tx`, políticas fail-closed, fixtures T1/T2/TP.                                 | Suite `apps/api/test/isolation/*` en verde; migraciones desde cero; sin contexto, 0 filas; sin DDL para `app_user`. |
 | **2. Autenticación y cuentas** ✅       | Better Auth por reino, invitaciones, alta de alumnos, reset/verificación por Mailpit, pantallas móviles, bootstrap PupiApp.                                   | Suite auth + aislamiento en verde; rate limit; tokens hasheados; sesiones entre reinos rechazadas.                  |
+| **2.1 Cierre Fase 2** ✅                | Deep link de reset, eliminación de cuenta (soft-delete de dominio), política de retención, guía de verificación manual.                                       | Reset one-time + borrado/revocación en verde; sin emulador local (manual documentado).                              |
 | **3. Biblioteca y videos**              | Ejercicios con revisiones, biblioteca global, subida con cuarentena, worker con `ffprobe`, cuotas, URLs firmadas.                                             | Archivos falsos, renombrados, demasiado grandes o largos rechazados; deduplicación por tenant; nivel 5.             |
 | **4. Rutinas versionadas**              | Plantillas, borradores, publicación, asignación, personalización, diferencias contra la plantilla.                                                            | Inmutabilidad de lo publicado, reconstrucción histórica, nivel 4 (IDOR).                                            |
 | **5. Entrenamiento y progreso**         | Modo sesión, offline con SQLite y cola, progreso, primera prueba de carga con k6.                                                                             | Doble sincronización sin duplicados; sesión fijada a su versión; línea base de rendimiento.                         |

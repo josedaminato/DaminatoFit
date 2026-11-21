@@ -2,7 +2,7 @@ import type { FastifyInstance } from 'fastify';
 import type { Sql } from 'postgres';
 import type { AuthInstance } from '../auth/realms';
 import type { RealmId } from '@daminatofit/brand';
-import { resolveAuthContext } from '../auth/session';
+import { fromFastifyHeaders, resolveAuthContext } from '../auth/session';
 import { withTenantContext } from '../../db/tenant-tx';
 import { z } from 'zod';
 
@@ -168,4 +168,34 @@ export async function meRoutes(
       },
     };
   });
+
+  const DeleteAccountSchema = z.object({
+    password: z.string().min(8).max(128),
+    confirm: z.literal('ELIMINAR'),
+  });
+
+  app.post(
+    '/v1/me/account/delete',
+    { config: { rateLimit: { max: 5, timeWindow: '1 minute' } } },
+    async (request, reply) => {
+      const auth = await resolveAuthContext(request, opts.auths, opts.appSql);
+      if (!auth) return reply.code(401).send({ error: 'unauthorized' });
+
+      const parsed = DeleteAccountSchema.safeParse(request.body);
+      if (!parsed.success) {
+        return reply.code(400).send({ error: 'invalid_body' });
+      }
+
+      try {
+        await opts.auths[auth.realm].api.deleteUser({
+          body: { password: parsed.data.password },
+          headers: fromFastifyHeaders(request),
+        });
+        return { status: 'deleted' };
+      } catch (error) {
+        request.log.error(error);
+        return reply.code(400).send({ error: 'delete_failed' });
+      }
+    },
+  );
 }

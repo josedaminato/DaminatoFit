@@ -3,6 +3,7 @@ import { brands, type RealmId } from '@daminatofit/brand';
 import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { bearer } from 'better-auth/plugins';
+import type { Sql } from 'postgres';
 import type { Env } from '../../config/env';
 import { requireAuthSecret } from '../../config/env';
 import type { Db } from '../../db/client';
@@ -16,7 +17,10 @@ const realmSchemas = {
 
 export type AuthInstance = ReturnType<typeof createAuthForRealm>;
 
-export function createAuthForRealm(realm: RealmId, db: Db, env: Env) {
+/** Captures reset tokens in test runs (raw token, never logged in production). */
+export const testResetTokens = new Map<string, string>();
+
+export function createAuthForRealm(realm: RealmId, db: Db, env: Env, domainSql: Sql) {
   const schema = realmSchemas[realm];
   const brand = Object.values(brands).find((b) => b.authRealm === realm);
   if (!brand) {
@@ -50,11 +54,13 @@ export function createAuthForRealm(realm: RealmId, db: Db, env: Env) {
     }),
     emailAndPassword: {
       enabled: true,
-      // Public Better Auth sign-up stays available; trainer/student product rules
-      // are enforced in our domain endpoints (and PupiApp blocks free trainer signup).
       minPasswordLength: 8,
       requireEmailVerification: env.NODE_ENV === 'production',
-      sendResetPassword: async ({ user, url }) => {
+      revokeSessionsOnPasswordReset: true,
+      sendResetPassword: async ({ user, url, token }) => {
+        if (env.NODE_ENV === 'test') {
+          testResetTokens.set(`${realm}:${user.email.toLowerCase()}`, token);
+        }
         const message = resetPasswordEmail(brand.id, url);
         message.to = user.email;
         await sendMail(env, message);
@@ -68,25 +74,33 @@ export function createAuthForRealm(realm: RealmId, db: Db, env: Env) {
       },
       sendOnSignUp: true,
     },
+    user: {
+      deleteUser: {
+        enabled: true,
+        beforeDelete: async (user) => {
+          await domainSql`SELECT app.soft_delete_identity(${realm}, ${user.id})`;
+        },
+      },
+    },
     session: {
       expiresIn: 60 * 60 * 24 * 14,
       updateAge: 60 * 60 * 24,
+      freshAge: 60 * 60 * 24,
       cookieCache: {
         enabled: false,
       },
     },
     advanced: {
-      // Separate cookie names per realm so sessions never collide on one device.
       cookiePrefix: `ba_${realm}`,
     },
     plugins: [expo(), bearer()],
   });
 }
 
-export function createAuthRealms(db: Db, env: Env): Record<RealmId, AuthInstance> {
+export function createAuthRealms(db: Db, env: Env, domainSql: Sql): Record<RealmId, AuthInstance> {
   return {
-    daminatofit: createAuthForRealm('daminatofit', db, env),
-    pupiapp: createAuthForRealm('pupiapp', db, env),
+    daminatofit: createAuthForRealm('daminatofit', db, env, domainSql),
+    pupiapp: createAuthForRealm('pupiapp', db, env, domainSql),
   };
 }
 

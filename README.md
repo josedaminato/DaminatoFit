@@ -13,6 +13,7 @@ Plataforma móvil para entrenadores personales y alumnos. Una sola base de códi
 | 0.1 Alineación (marcas, seguridad CI)   | Completada              |
 | 1 Base de datos + RLS                   | Completada              |
 | 2 Autenticación, cuentas e invitaciones | Completada              |
+| 2.1 Cierre (reset + borrado de cuenta)  | Completada              |
 | 3 Biblioteca y videos                   | Pendiente de aprobación |
 
 ## Requisitos
@@ -41,11 +42,14 @@ pnpm mobile:daminatofit   # o: pnpm mobile:pupiapp
 | Almacenamiento S3 | http://localhost:9000 (consola :9001)                       |
 | Correo de prueba  | http://localhost:8025                                       |
 
-## Fase 2 — recorridos
+## Fase 2 / 2.1 — recorridos
 
 - **Entrenador (DaminatoFit):** registro → perfil/WhatsApp → invitar alumno → listar → cerrar sesión.
 - **Alumno:** invitación → cuenta o login → aceptar → contacto WhatsApp → cerrar sesión.
+- **Recuperación:** `scheme://reset-password?token=…` → nueva contraseña (un solo uso).
+- **Eliminación:** Ajustes → confirmar `ELIMINAR` + contraseña (ver `docs/privacy-account-deletion.md`).
 - **PupiApp:** sin alta libre de entrenadores; bootstrap con `PUPIAPP_BOOTSTRAP_SECRET`.
+- **Verificación en dispositivo:** `docs/fase-2.1-verificacion-manual.md`
 
 ## Comandos
 

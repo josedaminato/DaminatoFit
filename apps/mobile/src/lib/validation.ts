@@ -9,6 +9,10 @@ export function isValidPassword(value: string): boolean {
   return value.length >= 8 && value.length <= 128;
 }
 
+export function passwordsMatch(password: string, confirm: string): boolean {
+  return password === confirm && password.length > 0;
+}
+
 export function validationMessage(
   field: 'email' | 'password' | 'name' | 'businessName',
   value: string,
