@@ -9,6 +9,7 @@ const links = [
   ['/storage', 'Almacenamiento'],
   ['/config', 'Configuración'],
   ['/audit', 'Auditoría'],
+  ['/recommendations', 'Recomendaciones'],
 ] as const;
 
 export function Layout({ email, onSignOut }: { email: string; onSignOut: () => void }) {

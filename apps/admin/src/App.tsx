@@ -4,6 +4,7 @@ import { Layout } from './components/Layout';
 import { apiFetch } from './lib/api';
 import { authClient, readBearer, writeBearer } from './lib/auth';
 import { AuditPage } from './pages/AuditPage';
+import { RecommendationsPage } from './pages/RecommendationsPage';
 import { BillingPage } from './pages/BillingPage';
 import { ConfigPage } from './pages/ConfigPage';
 import { DashboardPage } from './pages/DashboardPage';
@@ -66,6 +67,7 @@ export default function App() {
           <Route path="storage" element={<StoragePage />} />
           <Route path="config" element={<ConfigPage />} />
           <Route path="audit" element={<AuditPage />} />
+          <Route path="recommendations" element={<RecommendationsPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>

@@ -26,6 +26,7 @@ export const GLOBAL_OR_IDENTITY_TABLES = [
   'referral_attributions',
   'platform_admin_audit',
   'platform_metric_snapshots',
+  'recommendation_categories',
   'schema_migrations',
 ] as const;
 
@@ -63,6 +64,9 @@ export const RLS_REQUIRED_TABLES = [
   'referral_attributions',
   'platform_admin_audit',
   'platform_metric_snapshots',
+  'recommendation_categories',
+  'trainer_recommendations',
+  'recommendation_reports',
 ] as const;
 
 /** Tables that carry an explicit tenant_id column. */
@@ -86,4 +90,6 @@ export const TENANT_ID_TABLES = [
   'workout_set_logs',
   'audit_logs',
   'notification_deliveries',
+  'trainer_recommendations',
+  'recommendation_reports',
 ] as const;

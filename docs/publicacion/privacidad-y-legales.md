@@ -31,11 +31,11 @@ Las tiendas piden que este camino exista y que la ficha lo describa. Falta la UR
 
 Avisos y mensajes son texto del entrenador. La app no los interpreta como HTML.
 
-Para las tiendas falta, y no está construido:
+Para las recomendaciones de un entrenador ya existe una denuncia (fraudulenta, engañosa, peligrosa, inapropiada o enlace sospechoso) y el panel admin puede ocultarlas. Sigue faltando, y no está construido para avisos y mensajes:
 
-- Denunciar un contenido.
+- Denunciar un aviso o un mensaje.
 - Bloquear a un entrenador desde el alumno más allá de dejar de usar el espacio.
-- Un contacto del responsable de la app para esos reportes.
+- Un contacto público del responsable de la app para esos reportes.
 
 Hasta eso, no conviene presentar las fichas como listas.
 

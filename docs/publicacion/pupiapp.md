@@ -18,7 +18,7 @@ Nada de esto está contratado ni presentado.
 - Política de privacidad propia, aunque el texto técnico se parezca. La responsable de los datos de sus alumnos tiene que estar identificada. Eso es una decisión legal, no un texto inventado acá.
 - Ícono, capturas y descripción que no sean una copia de DaminatoFit. Apple 4.2.6 y 4.3 sancionan apps que parecen plantilla o spam. El riesgo está anotado en la arquitectura y **no está resuelto** con una presentación.
 - Credenciales de revisión del espacio PupiApp (entrenador bootstrap de prueba y un alumno). No crearlas con datos personales reales ni subirlas al repositorio.
-- Mismo hueco de contenido generado por usuarios que DaminatoFit: falta denuncia y bloqueo antes de considerar la ficha completa.
+- Las recomendaciones se pueden denunciar en ambas marcas. Avisos y mensajes siguen sin denuncia ni bloqueo. La ficha no está completa por eso.
 - Notificaciones: mismo adaptador y mismas credenciales ausentes. Un token de PupiApp no sirve para DaminatoFit porque el reino y la marca son otros.
 
 ## Qué no hacer

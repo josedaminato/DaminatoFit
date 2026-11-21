@@ -13,6 +13,7 @@ import { exercisesRoutes } from './modules/exercises/exercises.routes';
 import { mediaRoutes } from './modules/media/media.routes';
 import { appearanceRoutes } from './modules/appearance/appearance.routes';
 import { communicationsRoutes } from './modules/communications/communications.routes';
+import { recommendationsRoutes } from './modules/recommendations/recommendations.routes';
 import { createPushAdapter, type PushAdapter } from './modules/notifications/push-adapter';
 import { routinesRoutes } from './modules/routines/routines.routes';
 import { progressRoutes } from './modules/workouts/progress.routes';
@@ -101,6 +102,11 @@ export async function buildApp(
     auths,
     appSql: appDb.sql,
     migratorSql: migrator.sql,
+    env,
+  });
+  await app.register(recommendationsRoutes, {
+    auths,
+    appSql: appDb.sql,
     env,
   });
   await app.register(communicationsRoutes, {

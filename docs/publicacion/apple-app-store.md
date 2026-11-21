@@ -25,7 +25,9 @@ Requisitos conocidos a noviembre de 2026. **Verificar** en App Store Connect y e
 
 ## Contenido generado por usuarios
 
-Los avisos y mensajes los escribe el entrenador y los leen sus alumnos. Apple suele exigir, para contenido generado por usuarios, formas de filtrar contenido objetable, denunciar, bloquear al autor y un contacto del desarrollador (guideline 1.2). **Eso no está implementado.** Es un bloqueo conocido para enviar la app, no una función de esta fase.
+Los avisos y mensajes los escribe el entrenador y los leen sus alumnos. Apple suele exigir, para contenido generado por usuarios, formas de filtrar contenido objetable, denunciar, bloquear al autor y un contacto del desarrollador (guideline 1.2).
+
+Las recomendaciones de la Fase 8 sí se pueden denunciar, y un administrador puede ocultarlas. Los avisos y los mensajes individuales siguen sin denuncia ni bloqueo. Ese hueco sigue siendo un bloqueo para enviar la ficha.
 
 ## Rechazos que ya están identificados como riesgo
 

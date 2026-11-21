@@ -29,7 +29,7 @@ Requisitos conocidos a noviembre de 2026. **Verificar** cada punto en la consola
 ## Contenido y cuentas
 
 - Las cuentas se crean en la app. Play exige un camino de eliminación de cuenta si el usuario puede registrarse. Existe en Ajustes (confirmar `ELIMINAR` y contraseña). La URL o los pasos tienen que coincidir con la ficha.
-- Los entrenadores publican texto (avisos y mensajes). Ver `privacidad-y-legales.md`: falta un mecanismo de denuncia antes de considerar la ficha completa.
+- Los entrenadores publican texto (avisos, mensajes y recomendaciones). Las recomendaciones se pueden denunciar. Avisos y mensajes todavía no. Ver `privacidad-y-legales.md`.
 - No hay compras dentro de la app en esta fase. No declarar productos de facturación.
 
 ## Material

@@ -94,6 +94,13 @@ pnpm dev:admin            # panel web local (requiere admin provisionado)
 - Estimaciones (USD 2 / alumno simulado, tope USD 20) claramente separadas de cobros reales (aún 0). MFA pendiente antes de internet.
 - Provisionamiento local: `pnpm --filter @daminatofit/api admin:provision`. Detalle: [`docs/fase-7-admin.md`](./docs/fase-7-admin.md).
 
+## Fase 8 — recomendaciones del entrenador
+
+- Cada entrenador administra sus recomendaciones. Un acuerdo comercial es opcional.
+- El alumno ve las publicadas del entrenador activo, puede copiar un código y abrir WhatsApp con un texto que puede editar.
+- Las denuncias llegan al panel admin. El administrador puede ocultar contenido; no edita códigos ni condiciones.
+- La Fase 9 (Red DaminatoFit / directorio de proveedores) no está implementada. Detalle: [`docs/fase-8-recomendaciones.md`](./docs/fase-8-recomendaciones.md).
+
 ## Comandos
 
 | Comando                        | Qué hace                                                                   |

@@ -4,12 +4,16 @@ import {
   AdminPeriodQuerySchema,
   AdminSetTenantStatusSchema,
   AdminTrainerListQuerySchema,
+  RecommendationCategoryWriteSchema,
+  RecommendationModerateSchema,
   REFERRAL_POLICY,
 } from '@daminatofit/contracts';
 import type { FastifyPluginAsync } from 'fastify';
 import type { Sql } from 'postgres';
 import type { Env } from '../../config/env';
+import { withTenantContext } from '../../db/tenant-tx';
 import type { AuthInstance } from '../auth/realms';
+import { toTenantContext } from '../auth/session';
 import { recordAdminAudit, requirePlatformAdmin } from './admin-auth';
 import {
   billingEstimates,
@@ -343,5 +347,140 @@ export const adminRoutes: FastifyPluginAsync<AdminRouteOpts> = async (app, opts)
   // Explicitly no public admin registration surface.
   app.post('/v1/admin/register', async (_request, reply) => {
     return reply.code(404).send({ error: 'not_found' });
+  });
+
+  // Recommendation moderation uses app_user + SECURITY DEFINER checks.
+  // It does not query through the migrator superuser connection.
+  app.get('/v1/admin/recommendations/summary', { preHandler: gate }, async (request, reply) => {
+    const auth = await gate(request, reply);
+    if (!auth) return;
+    const rows = await withTenantContext(
+      opts.appSql,
+      toTenantContext(auth),
+      (tx) =>
+        tx<
+          {
+            brand_slug: string;
+            published_count: number;
+            hidden_by_trainer: number;
+            hidden_by_moderation: number;
+            open_reports: number;
+          }[]
+        >`
+        SELECT * FROM app.recommendation_counts_by_brand(${auth.domainUser.id}::uuid)
+      `,
+    );
+    return {
+      brands: rows.map((row) => ({
+        brand: row.brand_slug,
+        published: row.published_count,
+        hiddenByTrainer: row.hidden_by_trainer,
+        hiddenByModeration: row.hidden_by_moderation,
+        openReports: row.open_reports,
+      })),
+      note: 'Counts stay separated by brand. PupiApp is not a DaminatoFit commercial tenant.',
+    };
+  });
+
+  app.get('/v1/admin/recommendations/reports', { preHandler: gate }, async (request, reply) => {
+    const auth = await gate(request, reply);
+    if (!auth) return;
+    const query = request.query as { brand?: string };
+    const brand = query.brand === 'pupiapp' || query.brand === 'daminatofit' ? query.brand : null;
+    const rows = await withTenantContext(
+      opts.appSql,
+      toTenantContext(auth),
+      (tx) =>
+        tx<
+          {
+            report_id: string;
+            recommendation_id: string;
+            brand_slug: string;
+            tenant_id: string;
+            trainer_name: string;
+            recommendation_name: string;
+            destination_url: string;
+            reason: string;
+            details: string;
+            report_status: string;
+            created_at: Date | string;
+            moderation_hidden_at: Date | string | null;
+          }[]
+        >`
+        SELECT * FROM app.list_recommendation_reports(${auth.domainUser.id}::uuid, ${brand})
+      `,
+    );
+    return {
+      items: rows.map((row) => ({
+        id: row.report_id,
+        recommendationId: row.recommendation_id,
+        brand: row.brand_slug,
+        tenantId: row.tenant_id,
+        trainerName: row.trainer_name,
+        recommendationName: row.recommendation_name,
+        destinationUrl: row.destination_url,
+        reason: row.reason,
+        details: row.details,
+        status: row.report_status,
+        createdAt:
+          row.created_at instanceof Date ? row.created_at.toISOString() : String(row.created_at),
+        moderationHidden: Boolean(row.moderation_hidden_at),
+      })),
+    };
+  });
+
+  app.post('/v1/admin/recommendations/moderate', { preHandler: gate }, async (request, reply) => {
+    const auth = await gate(request, reply);
+    if (!auth) return;
+    const parsed = RecommendationModerateSchema.safeParse(request.body);
+    if (!parsed.success) return reply.code(400).send({ error: 'invalid_body' });
+    try {
+      const rows = await withTenantContext(
+        opts.appSql,
+        toTenantContext(auth),
+        (tx) =>
+          tx<{ recommendation_id: string; report_status: string; moderation_hidden: boolean }[]>`
+          SELECT * FROM app.moderate_recommendation(
+            ${auth.domainUser.id}::uuid,
+            ${parsed.data.reportId}::uuid,
+            ${parsed.data.action},
+            ${parsed.data.reason}
+          )
+        `,
+      );
+      return {
+        recommendationId: rows[0]?.recommendation_id,
+        reportStatus: rows[0]?.report_status,
+        moderationHidden: rows[0]?.moderation_hidden ?? false,
+      };
+    } catch (error) {
+      const message = error instanceof Error ? error.message : '';
+      if (message.includes('report not found')) return reply.code(404).send({ error: 'not_found' });
+      return reply.code(400).send({ error: 'moderation_failed' });
+    }
+  });
+
+  app.post('/v1/admin/recommendation-categories', { preHandler: gate }, async (request, reply) => {
+    const auth = await gate(request, reply);
+    if (!auth) return;
+    const parsed = RecommendationCategoryWriteSchema.safeParse(request.body);
+    if (!parsed.success) return reply.code(400).send({ error: 'invalid_body' });
+    try {
+      const rows = await withTenantContext(
+        opts.appSql,
+        toTenantContext(auth),
+        (tx) =>
+          tx<{ id: string }[]>`
+          SELECT app.add_recommendation_category(
+            ${auth.domainUser.id}::uuid,
+            ${parsed.data.slug},
+            ${parsed.data.name}
+          ) AS id
+        `,
+      );
+      return reply.code(201).send({ id: rows[0]?.id, slug: parsed.data.slug });
+    } catch {
+      return reply.code(400).send({ error: 'category_not_created' });
+    }
   });
 };

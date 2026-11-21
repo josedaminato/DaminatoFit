@@ -23,7 +23,7 @@ import { resolveAuthContext } from '../auth/session';
 const RequestUploadSchema = z.object({
   contentType: z.enum(['video/mp4', 'video/quicktime', 'image/jpeg', 'image/png', 'image/webp']),
   declaredSizeBytes: z.number().int().positive(),
-  purpose: z.enum(['video', 'logo']).default('video'),
+  purpose: z.enum(['video', 'logo', 'recommendation']).default('video'),
 });
 
 export async function mediaRoutes(
@@ -45,16 +45,16 @@ export async function mediaRoutes(
     const parsed = RequestUploadSchema.safeParse(request.body);
     if (!parsed.success) return reply.code(400).send({ error: 'invalid_body' });
 
-    const isLogo = parsed.data.purpose === 'logo';
-    const kind = isLogo ? 'image' : 'video';
-    if (isLogo && !parsed.data.contentType.startsWith('image/')) {
+    const isImage = parsed.data.purpose === 'logo' || parsed.data.purpose === 'recommendation';
+    const kind = isImage ? 'image' : 'video';
+    if (isImage && !parsed.data.contentType.startsWith('image/')) {
       return reply.code(400).send({ error: 'invalid_body' });
     }
-    if (!isLogo && !parsed.data.contentType.startsWith('video/')) {
+    if (!isImage && !parsed.data.contentType.startsWith('video/')) {
       return reply.code(400).send({ error: 'invalid_body' });
     }
 
-    const maxBytes = isLogo ? opts.env.MEDIA_LOGO_MAX_BYTES : opts.env.MEDIA_MAX_BYTES;
+    const maxBytes = isImage ? opts.env.MEDIA_LOGO_MAX_BYTES : opts.env.MEDIA_MAX_BYTES;
     if (parsed.data.declaredSizeBytes > maxBytes) {
       return reply.code(400).send({ error: 'file_too_large', maxBytes });
     }

@@ -26,6 +26,6 @@ Documento de producto/técnico. **No constituye asesoramiento legal.** Las oblig
 - Exportación de datos previos a la eliminación.
 - Conservación de facturación / comprobantes cuando existan (Fase comercial).
 - Si un entrenador con alumnos activos debe poder eliminarse sin transferir el espacio (hoy se archiva el espacio).
-- Tratamiento de **logotipos e imágenes UGC** (Fase 5.1) y de **avisos y mensajes** (Fase 6): ver `docs/fase-5.1-apariencia.md`, `docs/fase-6-comunicacion.md` y `docs/publicacion/`. Al eliminar la cuenta también se revocan los tokens de push.
+- Tratamiento de **logotipos e imágenes UGC** (Fase 5.1), de **avisos y mensajes** (Fase 6) y de **recomendaciones y denuncias** (Fase 8): ver `docs/fase-5.1-apariencia.md`, `docs/fase-6-comunicacion.md`, `docs/fase-8-recomendaciones.md` y `docs/publicacion/`. Al eliminar la cuenta se archiva el espacio del entrenador; las recomendaciones dejan de ser visibles por membresía, pero no hay un plazo de borrado definido. Al eliminar la cuenta también se revocan los tokens de push.
 
 Hasta definir esas reglas, no se inventan plazos ni borrados en cascada adicionales.

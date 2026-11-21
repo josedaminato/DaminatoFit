@@ -149,6 +149,9 @@ export default function StudentHomeScreen() {
         <Link href="/student/contact" asChild>
           <Button label="Contactar a mi entrenador" onPress={() => undefined} />
         </Link>
+        <Link href="/student/recommendations" asChild>
+          <Button label="Recomendaciones de mi entrenador" onPress={() => undefined} />
+        </Link>
         <Link href="/student/select-trainer" asChild>
           <Button label="Cambiar espacio" variant="secondary" onPress={() => undefined} />
         </Link>
