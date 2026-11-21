@@ -1,5 +1,6 @@
 export * from './announcements';
 export * from './audit';
+export * from './auth-tables';
 export * from './brands';
 export * from './invitations';
 export * from './memberships';

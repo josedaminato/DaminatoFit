@@ -21,6 +21,8 @@ export async function resetDatabase(): Promise<void> {
   const sql = (await import('postgres')).default(migratorUrl(), { max: 1, prepare: false });
   try {
     await sql.unsafe(`
+      DROP SCHEMA IF EXISTS auth_daminatofit CASCADE;
+      DROP SCHEMA IF EXISTS auth_pupiapp CASCADE;
       DROP SCHEMA IF EXISTS app CASCADE;
       DROP SCHEMA public CASCADE;
       CREATE SCHEMA public;

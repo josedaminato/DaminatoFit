@@ -8,7 +8,16 @@ describe('API app', () => {
   let app: FastifyInstance;
 
   beforeAll(async () => {
-    app = await buildApp(loadEnv({ NODE_ENV: 'test', LOG_LEVEL: 'silent', APP_VERSION: '1.2.3' }));
+    const env = loadEnv({
+      ...process.env,
+      NODE_ENV: 'test',
+      LOG_LEVEL: 'silent',
+      APP_VERSION: '1.2.3',
+      BETTER_AUTH_SECRET:
+        process.env.BETTER_AUTH_SECRET ?? 'test_secret_daminatofit_phase2_32chars!',
+    });
+    const built = await buildApp(env);
+    app = built.app;
   });
 
   afterAll(async () => {

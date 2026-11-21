@@ -62,21 +62,22 @@ export async function seedScenario(sql: Sql): Promise<ScenarioIds> {
     muscleGroupId: randomUUID(),
   };
 
-  await sql`
-    INSERT INTO brands (id, slug, name, distribution, realm, max_tenants) VALUES
-      (${ids.brands.daminatofit}, 'daminatofit', 'DaminatoFit', 'platform', 'daminatofit', NULL),
-      (${ids.brands.pupiapp}, 'pupiapp', 'PupiApp', 'standalone', 'pupiapp', 1)
+  // Brands are seeded by migration 0002; reuse their ids.
+  const brandRows = await sql<{ id: string; slug: string }[]>`
+    SELECT id, slug FROM brands WHERE slug IN ('daminatofit', 'pupiapp')
   `;
+  ids.brands.daminatofit = brandRows.find((b) => b.slug === 'daminatofit')!.id;
+  ids.brands.pupiapp = brandRows.find((b) => b.slug === 'pupiapp')!.id;
 
   await sql`
     INSERT INTO users (id, realm, auth_user_id, display_name) VALUES
-      (${ids.users.trainerA}, 'daminatofit', ${randomUUID()}, 'Trainer A'),
-      (${ids.users.studentS1}, 'daminatofit', ${randomUUID()}, 'Student S1'),
-      (${ids.users.studentS2}, 'daminatofit', ${randomUUID()}, 'Student S2'),
-      (${ids.users.trainerB}, 'daminatofit', ${randomUUID()}, 'Trainer B'),
-      (${ids.users.studentS3}, 'daminatofit', ${randomUUID()}, 'Student S3'),
-      (${ids.users.trainerP}, 'pupiapp', ${randomUUID()}, 'Trainer P'),
-      (${ids.users.studentSP}, 'pupiapp', ${randomUUID()}, 'Student SP')
+      (${ids.users.trainerA}, 'daminatofit', ${`auth_${randomUUID()}`}, 'Trainer A'),
+      (${ids.users.studentS1}, 'daminatofit', ${`auth_${randomUUID()}`}, 'Student S1'),
+      (${ids.users.studentS2}, 'daminatofit', ${`auth_${randomUUID()}`}, 'Student S2'),
+      (${ids.users.trainerB}, 'daminatofit', ${`auth_${randomUUID()}`}, 'Trainer B'),
+      (${ids.users.studentS3}, 'daminatofit', ${`auth_${randomUUID()}`}, 'Student S3'),
+      (${ids.users.trainerP}, 'pupiapp', ${`auth_${randomUUID()}`}, 'Trainer P'),
+      (${ids.users.studentSP}, 'pupiapp', ${`auth_${randomUUID()}`}, 'Student SP')
   `;
 
   await sql`

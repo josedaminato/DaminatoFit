@@ -3,16 +3,13 @@ import { loadEnv } from './env';
 
 describe('loadEnv', () => {
   it('applies defaults when variables are missing', () => {
-    expect(loadEnv({})).toEqual({
-      NODE_ENV: 'development',
-      API_HOST: '0.0.0.0',
-      API_PORT: 3000,
-      LOG_LEVEL: 'info',
-      APP_VERSION: 'dev',
-      DATABASE_URL: undefined,
-      DATABASE_URL_APP: undefined,
-      DATABASE_URL_ADMIN: undefined,
-    });
+    const env = loadEnv({});
+    expect(env.NODE_ENV).toBe('development');
+    expect(env.API_HOST).toBe('0.0.0.0');
+    expect(env.API_PORT).toBe(3000);
+    expect(env.LOG_LEVEL).toBe('info');
+    expect(env.APP_VERSION).toBe('dev');
+    expect(env.API_PUBLIC_URL).toBe('http://127.0.0.1:3000');
   });
 
   it('coerces the port from a string', () => {

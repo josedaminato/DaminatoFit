@@ -1,13 +1,73 @@
+import cors from '@fastify/cors';
+import rateLimit from '@fastify/rate-limit';
 import Fastify, { type FastifyInstance } from 'fastify';
 import type { Env } from './config/env';
+import { requireAuthSecret, requireDatabaseUrl } from './config/env';
+import { closeDb, createDb, type DbHandles } from './db/client';
+import { authRoutes } from './modules/auth/auth.routes';
+import { createAuthRealms } from './modules/auth/realms';
 import { healthRoutes } from './modules/health/health.routes';
+import { invitationsRoutes } from './modules/invitations/invitations.routes';
+import { meRoutes } from './modules/me/me.routes';
+import { trainersRoutes } from './modules/trainers/trainers.routes';
 
-export async function buildApp(env: Env): Promise<FastifyInstance> {
+export interface AppResources {
+  migrator: DbHandles;
+  appDb: DbHandles;
+}
+
+export async function buildApp(
+  env: Env,
+  resources?: AppResources,
+): Promise<{ app: FastifyInstance; resources: AppResources }> {
+  requireAuthSecret(env);
+  const databaseUrl = requireDatabaseUrl(env);
+  const appDatabaseUrl = env.DATABASE_URL_APP ?? databaseUrl;
+
+  const owned = !resources;
+  const migrator = resources?.migrator ?? createDb(databaseUrl);
+  const appDb = resources?.appDb ?? createDb(appDatabaseUrl);
+  const resolved: AppResources = { migrator, appDb };
+
+  const auths = createAuthRealms(migrator.db, env);
+
   const app = Fastify({
     logger: env.LOG_LEVEL === 'silent' ? false : { level: env.LOG_LEVEL },
   });
 
-  await app.register(healthRoutes, { version: env.APP_VERSION });
+  await app.register(cors, {
+    origin: true,
+    credentials: true,
+    exposedHeaders: ['set-auth-token'],
+  });
+  await app.register(rateLimit, {
+    global: false,
+    max: 100,
+    timeWindow: '1 minute',
+  });
 
-  return app;
+  await app.register(healthRoutes, { version: env.APP_VERSION });
+  await app.register(authRoutes, { auths });
+  await app.register(trainersRoutes, {
+    auths,
+    appSql: appDb.sql,
+    migratorSql: migrator.sql,
+    env,
+  });
+  await app.register(invitationsRoutes, {
+    auths,
+    appSql: appDb.sql,
+    migratorSql: migrator.sql,
+    env,
+  });
+  await app.register(meRoutes, { auths, appSql: appDb.sql });
+
+  app.addHook('onClose', async () => {
+    if (owned) {
+      await closeDb(appDb);
+      await closeDb(migrator);
+    }
+  });
+
+  return { app, resources: resolved };
 }

@@ -12,15 +12,22 @@
     "test": "node --env-file-if-exists=../../.env ../../node_modules/vitest/vitest.mjs run"
   },
   "dependencies": {
+    "@better-auth/expo": "^1.7.27",
+    "@daminatofit/brand": "workspace:*",
     "@daminatofit/contracts": "workspace:*",
+    "@fastify/cors": "^11.4.3",
+    "@fastify/rate-limit": "^11.3.0",
+    "better-auth": "^1.7.27",
     "drizzle-orm": "^0.45.4",
     "fastify": "^5.12.8",
+    "nodemailer": "^10.6.1",
     "postgres": "^4.1.1",
     "zod": "^4.6.7"
   },
   "devDependencies": {
     "@daminatofit/config": "workspace:*",
     "@types/node": "^22.19.0",
+    "@types/nodemailer": "^8.0.2",
     "drizzle-kit": "^0.31.11",
     "tsup": "^9.0.0",
     "tsx": "^4.23.15",

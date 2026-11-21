@@ -1,12 +1,13 @@
 import { pgTable, text, timestamp, unique, uuid } from 'drizzle-orm/pg-core';
+// uuid kept for primary key; authUserId is text (Better Auth).
 
 export const users = pgTable(
   'users',
   {
     id: uuid('id').primaryKey().defaultRandom(),
     realm: text('realm').notNull(),
-    // Links to Better Auth in Phase 2; Phase 1 stores a stable placeholder UUID.
-    authUserId: uuid('auth_user_id').notNull(),
+    // Better Auth user id (opaque text) in auth_<realm>."user".
+    authUserId: text('auth_user_id').notNull(),
     displayName: text('display_name').notNull(),
     avatarMediaId: uuid('avatar_media_id'),
     platformRole: text('platform_role').notNull().default('user'), // user | platform_admin

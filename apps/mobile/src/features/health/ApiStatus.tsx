@@ -3,21 +3,14 @@ import { StyleSheet, Text } from 'react-native';
 import { useBrand } from '@/brand/BrandProvider';
 import { fetchHealth, getApiUrl } from '@/lib/api';
 
-type Status =
-  | { kind: 'unconfigured' }
-  | { kind: 'checking' }
-  | { kind: 'ok'; version: string }
-  | { kind: 'error' };
+type Status = { kind: 'checking' } | { kind: 'ok'; version: string } | { kind: 'error' };
 
 export function ApiStatus() {
   const { brand, colors } = useBrand();
   const apiUrl = getApiUrl();
-  const [status, setStatus] = useState<Status>(
-    apiUrl ? { kind: 'checking' } : { kind: 'unconfigured' },
-  );
+  const [status, setStatus] = useState<Status>({ kind: 'checking' });
 
   useEffect(() => {
-    if (!apiUrl) return;
     let cancelled = false;
     fetchHealth(apiUrl, brand.id)
       .then((health) => !cancelled && setStatus({ kind: 'ok', version: health.version }))
@@ -30,10 +23,6 @@ export function ApiStatus() {
   let label: string;
   let color: string;
   switch (status.kind) {
-    case 'unconfigured':
-      label = 'API sin configurar (EXPO_PUBLIC_API_URL)';
-      color = colors.textMuted;
-      break;
     case 'checking':
       label = 'Conectando con la API…';
       color = colors.textMuted;

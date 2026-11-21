@@ -3,7 +3,7 @@ import { loadEnv } from './config/env';
 
 async function main() {
   const env = loadEnv();
-  const app = await buildApp(env);
+  const { app } = await buildApp(env);
 
   const shutdown = async (signal: NodeJS.Signals) => {
     app.log.info({ signal }, 'shutting down');

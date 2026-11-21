@@ -4,8 +4,10 @@ import {
   type HealthResponse,
 } from '@daminatofit/contracts';
 
-export function getApiUrl(): string | null {
-  return process.env.EXPO_PUBLIC_API_URL ?? null;
+const DEFAULT_API_URL = 'http://127.0.0.1:3000';
+
+export function getApiUrl(): string {
+  return process.env.EXPO_PUBLIC_API_URL ?? DEFAULT_API_URL;
 }
 
 export async function fetchHealth(apiUrl: string, brandId: string): Promise<HealthResponse> {

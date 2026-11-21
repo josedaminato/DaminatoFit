@@ -15,6 +15,7 @@ export function createDb(connectionString: string): DbHandles {
   return { sql, db };
 }
 
-export async function closeDb(handles: DbHandles): Promise<void> {
+export async function closeDb(handles: DbHandles | null | undefined): Promise<void> {
+  if (!handles) return;
   await handles.sql.end({ timeout: 5 });
 }

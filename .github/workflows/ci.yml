@@ -45,6 +45,11 @@ jobs:
       DATABASE_URL: postgres://daminatofit:daminatofit_dev@localhost:5432/daminatofit
       DATABASE_URL_APP: postgres://app_user:app_user_dev@localhost:5432/daminatofit
       DATABASE_URL_ADMIN: postgres://app_admin:app_admin_dev@localhost:5432/daminatofit
+      BETTER_AUTH_SECRET: ci_only_test_secret_daminatofit_32c
+      PUPIAPP_BOOTSTRAP_SECRET: ci_pupiapp_bootstrap
+      API_PUBLIC_URL: http://127.0.0.1:3000
+      SMTP_HOST: 127.0.0.1
+      SMTP_PORT: 1025
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6

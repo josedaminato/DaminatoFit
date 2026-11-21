@@ -17,13 +17,17 @@ describe('HomeScreen', () => {
     },
   );
 
-  it('tells the user when the API URL is not configured', async () => {
+  it('shows an error when the health check fails', async () => {
+    const originalFetch = global.fetch;
+    global.fetch = jest.fn().mockRejectedValue(new Error('network'));
+
     await render(
       <BrandProvider brand={brands.daminatofit}>
         <HomeScreen />
       </BrandProvider>,
     );
 
-    expect(screen.getByText(/API sin configurar/)).toBeOnTheScreen();
+    expect(await screen.findByText(/No se pudo conectar/)).toBeOnTheScreen();
+    global.fetch = originalFetch;
   });
 });
