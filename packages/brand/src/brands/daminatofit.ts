@@ -13,5 +13,8 @@ export const daminatofit: BrandConfig = {
     dark: { ...neutralDark, primary: '#2DD4BF', onPrimary: '#042F2E' },
   },
   links: { privacyPolicy: null, terms: null, support: null },
+  distribution: 'platform',
+  authRealm: 'daminatofit',
   trainerSignup: 'open',
+  maxTenants: null,
 };

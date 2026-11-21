@@ -1,0 +1,7 @@
+[extend]
+useDefault = true
+
+# `.env.example` files hold throwaway local defaults on purpose; real `.env` files are git-ignored.
+[[allowlists]]
+description = "Documented local-only placeholder credentials"
+paths = ['''(^|/)\.env\.example$''']

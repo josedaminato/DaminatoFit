@@ -1,7 +1,7 @@
 # Arquitectura DaminatoFit / PupiApp
 
 > **Versión:** revisión 2 (21/11/2026). Reemplaza la versión aprobada el mismo día; los cambios están resumidos en la sección 10.
-> **Estado del código:** la Fase 0 (fundaciones) ya fue implementada sobre la versión anterior. Esta revisión **no implementa nada nuevo**; la sección 8 indica qué ajustes menores necesita la Fase 0 para quedar alineada.
+> **Estado del código:** Fases **0**, **0.1** y **1** implementadas localmente. Fase 2 (autenticación) pendiente de aprobación.
 > **Convención del documento:** cada afirmación sobre terceros (precios, políticas de tiendas, librerías) indica si fue **verificada** en la fuente el 21/11/2026 o si es una **estimación**. Las reglas comerciales se marcan como **definidas** o **pendientes**.
 
 ---
@@ -564,29 +564,20 @@ Según las directrices verificadas, cobrar la suscripción del entrenador **dent
 
 ### 5.1 Comparación de opciones
 
-| Criterio            | 1. Local + hosting independiente económico                                                          | 2. Compartir temporalmente el VPS de AppMédica                                                                          | 3. VPS separado propio                            |
-| ------------------- | --------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------- |
-| Costo               | Desarrollo: 0. Beta: 0 con niveles gratuitos, o el costo de un VPS chico (estimación: USD 5–10/mes) | Sin costo adicional aparente                                                                                            | Estimación: USD 5–15/mes según tamaño y proveedor |
-| Capacidad           | Suficiente para beta; los niveles gratuitos suspenden instancias y limitan almacenamiento           | **Desconocida.** 1 vCPU compartida con AppMédica; requiere auditoría y pruebas de carga                                 | Dedicada y dimensionable                          |
-| Riesgo de seguridad | Bajo: sin relación con AppMédica                                                                    | **Alto:** un compromiso de una app expone el host donde están los **datos clínicos** de la otra                         | Bajo                                              |
-| Riesgo operativo    | Arranques en frío en niveles gratuitos (mala experiencia)                                           | Contención de CPU, memoria y disco (50 GB compartidos); actualizaciones y reinicios acoplados; una caída afecta a ambas | Una sola app que administrar                      |
-| Migración           | Fácil (contenedores, `pg_dump`, S3)                                                                 | Fácil técnicamente; el riesgo está en convivir                                                                          | Fácil                                             |
-| Cumplimiento        | Simple                                                                                              | Complica demostrar separación de datos de salud                                                                         | Simple                                            |
+| Criterio            | 1. Solo local (estas fases) | 2. VPS compartido con AppMédica (escenario inicial previsto)                                                                 | 3. VPS separado / gestionado (crecimiento)        |
+| ------------------- | --------------------------- | ---------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------- |
+| Costo               | 0                           | Sin costo adicional aparente                                                                                                 | Estimación: USD 5–15/mes según tamaño y proveedor |
+| Capacidad           | Suficiente para desarrollo  | 1 vCPU / 4 GB / 50 GB compartidos; AppMédica aún **sin clientes reales** (solo desarrollo/pruebas), pero hay que auditar uso | Dedicada y dimensionable                          |
+| Riesgo de seguridad | Bajo                        | Medio-alto: un compromiso del host afecta a ambas apps; AppMédica puede llegar a guardar datos clínicos                      | Bajo                                              |
+| Riesgo operativo    | Ninguno remoto              | Contención de CPU/RAM/disco; actualizaciones acopladas; una caída afecta a ambas                                             | Una sola app que administrar                      |
+| Migración           | —                           | Debe ser sencilla (contenedores + env + `pg_dump` + S3)                                                                      | Fácil                                             |
 
-**Recomendación:**
+**Recomendación (actualizada el 21/11/2026):**
 
-- **Ahora:** opción 1, solo desarrollo local (ya operativo; costo 0).
-- **Beta cerrada de PupiApp:** opción 1 con un **VPS chico independiente** (preferido, porque evita arranques en frío) o con niveles gratuitos, si se acepta su experiencia limitada. Cualquier gasto requiere aprobación del propietario.
-- **Producción con usuarios pagos o carga sostenida:** opción 3, dimensionada con datos reales de las pruebas de carga.
-- **Opción 2: no recomendada.** Solo podría evaluarse como medida temporal si el propietario lo pide, cumpliendo **todas** estas condiciones previas:
-  1. Auditoría de AppMédica: uso de CPU, RAM, disco e IO durante 1–2 semanas (incluidos picos), tamaño de base y respaldos, servicios expuestos.
-  2. Pruebas de carga de DaminatoFit en un entorno separado.
-  3. Margen demostrado de recursos.
-  4. Redes Docker, usuarios del sistema, bases de datos, credenciales y respaldos totalmente separados.
-  5. Límites de CPU y memoria por contenedor, y firewall.
-  6. Plan de reversión y aprobación por escrito.
-
-  Nada de esto se hizo ni se hará sin autorización.
+- **Ahora (Fases 0.1 y 1):** solo desarrollo local. **No se despliega ni se toca el VPS.**
+- **Escenario inicial comercial:** VPS compartido con AppMédica, porque AppMédica todavía no tiene clientes reales y el objetivo es minimizar gastos. Condiciones obligatorias antes de desplegar: auditoría de recursos, contenedores y bases separados, límites de CPU/RAM, redes y respaldos independientes, plan de reversión. Detalle en `docs/adr/0003-infraestructura-inicial.md`.
+- **Escenario futuro:** migrar DaminatoFit a un VPS propio o infraestructura administrada cuando la carga, los ingresos o el riesgo lo justifiquen. El diseño (contenedores, variables de entorno, migraciones, S3 externo, URL de API configurable) está pensado para esa migración.
+- No se asume que los datos actuales de AppMédica sean inocuos: aunque no haya clientes reales, cualquier despliegue compartido exige aislamiento y auditoría previos.
 
 ### 5.2 Despliegue previsto (portátil)
 
@@ -642,18 +633,18 @@ Según las directrices verificadas, cobrar la suscripción del entrenador **dent
 
 Cada fase termina con: pruebas en verde, migraciones aplicables desde cero, criterios de seguridad cumplidos y una demostración local. **No hay despliegues** sin aprobación.
 
-| Fase                                    | Contenido                                                                                                                                                         | Pruebas y criterios de salida                                                                           |
-| --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| **0. Fundaciones** ✅ (implementada)    | Monorepo, Docker Compose (PostgreSQL, RustFS, Mailpit), API `/health`, app con dos marcas, CI.                                                                    | 50 pruebas en verde; bundle Android de ambas marcas verificado.                                         |
-| **0.1 Alineación** (menor)              | Agregar `distribution` y `realm` a la configuración de marca; marcar el ADR 0002 como reemplazado; agregar a CI gitleaks, auditoría de dependencias y Dependabot. | Pruebas de marca actualizadas; CI con controles de seguridad.                                           |
-| **1. Datos, tenants y RLS**             | Roles de base, esquema de identidad, marcas y tenants, contexto por transacción, políticas, escenario de fixtures.                                                | Niveles 1, 2 y 6 de aislamiento; migraciones desde cero; sin contexto, 0 filas.                         |
-| **2. Autenticación y cuentas**          | Better Auth por reino, invitaciones, alta de alumnos, recuperación de contraseña, eliminación de cuenta, pantallas de acceso.                                     | Enumeración, rate limiting, revocación, sesiones entre reinos rechazadas, nivel 3 de la matriz.         |
-| **3. Biblioteca y videos**              | Ejercicios con revisiones, biblioteca global, subida con cuarentena, worker con `ffprobe`, cuotas, URLs firmadas.                                                 | Archivos falsos, renombrados, demasiado grandes o largos rechazados; deduplicación por tenant; nivel 5. |
-| **4. Rutinas versionadas**              | Plantillas, borradores, publicación, asignación, personalización, diferencias contra la plantilla.                                                                | Inmutabilidad de lo publicado, reconstrucción histórica, nivel 4 (IDOR).                                |
-| **5. Entrenamiento y progreso**         | Modo sesión, offline con SQLite y cola, progreso, primera prueba de carga con k6.                                                                                 | Doble sincronización sin duplicados; sesión fijada a su versión; línea base de rendimiento.             |
-| **6. Avisos, mensajes y contacto**      | Avisos, mensajes individuales, WhatsApp, push opcional.                                                                                                           | Un alumno no puede enviar mensajes; visibilidad solo para alumnos activos.                              |
-| **7. Endurecimiento y beta de PupiApp** | Backups con restauración probada, observabilidad, accesibilidad, checklist de tiendas, hosting aprobado, prueba cerrada en Google Play (12 testers, 14 días).     | Simulacro de restauración aprobado; revisión de seguridad; checklist de publicación completo.           |
-| Posteriores                             | Panel administrativo, web comercial, facturación, referidos, acuerdos, directorio, atribución.                                                                    | Requieren las decisiones de la sección 9.                                                               |
+| Fase                                    | Contenido                                                                                                                                                     | Pruebas y criterios de salida                                                                                       |
+| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| **0. Fundaciones** ✅ (implementada)    | Monorepo, Docker Compose (PostgreSQL, RustFS, Mailpit), API `/health`, app con dos marcas, CI.                                                                | 50 pruebas en verde; bundle Android de ambas marcas verificado.                                                     |
+| **0.1 Alineación** (menor) ✅           | `distribution`, `authRealm` y `maxTenants` en marcas; ADR 0002 reemplazado; gitleaks, Dependabot y `pnpm audit` en CI; ADR 0003 de infraestructura.           | Pruebas de marca actualizadas; CI con controles de seguridad.                                                       |
+| **1. Datos, tenants y RLS** ✅          | Roles `app_*`, esquema de identidad + avisos/mensajes/catálogo global, `tenant-tx`, políticas fail-closed, fixtures T1/T2/TP.                                 | Suite `apps/api/test/isolation/*` en verde; migraciones desde cero; sin contexto, 0 filas; sin DDL para `app_user`. |
+| **2. Autenticación y cuentas**          | Better Auth por reino, invitaciones, alta de alumnos, recuperación de contraseña, eliminación de cuenta, pantallas de acceso.                                 | Enumeración, rate limiting, revocación, sesiones entre reinos rechazadas, nivel 3 de la matriz.                     |
+| **3. Biblioteca y videos**              | Ejercicios con revisiones, biblioteca global, subida con cuarentena, worker con `ffprobe`, cuotas, URLs firmadas.                                             | Archivos falsos, renombrados, demasiado grandes o largos rechazados; deduplicación por tenant; nivel 5.             |
+| **4. Rutinas versionadas**              | Plantillas, borradores, publicación, asignación, personalización, diferencias contra la plantilla.                                                            | Inmutabilidad de lo publicado, reconstrucción histórica, nivel 4 (IDOR).                                            |
+| **5. Entrenamiento y progreso**         | Modo sesión, offline con SQLite y cola, progreso, primera prueba de carga con k6.                                                                             | Doble sincronización sin duplicados; sesión fijada a su versión; línea base de rendimiento.                         |
+| **6. Avisos, mensajes y contacto**      | Avisos, mensajes individuales, WhatsApp, push opcional.                                                                                                       | Un alumno no puede enviar mensajes; visibilidad solo para alumnos activos.                                          |
+| **7. Endurecimiento y beta de PupiApp** | Backups con restauración probada, observabilidad, accesibilidad, checklist de tiendas, hosting aprobado, prueba cerrada en Google Play (12 testers, 14 días). | Simulacro de restauración aprobado; revisión de seguridad; checklist de publicación completo.                       |
+| Posteriores                             | Panel administrativo, web comercial, facturación, referidos, acuerdos, directorio, atribución.                                                                | Requieren las decisiones de la sección 9.                                                                           |
 
 ---
 

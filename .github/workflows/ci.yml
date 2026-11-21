@@ -13,9 +13,38 @@ permissions:
   contents: read
 
 jobs:
+  secrets:
+    name: Secret scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   check:
     name: Lint, typecheck, tests
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17.12-alpine
+        env:
+          POSTGRES_USER: daminatofit
+          POSTGRES_PASSWORD: daminatofit_dev
+          POSTGRES_DB: daminatofit
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U daminatofit -d daminatofit"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgres://daminatofit:daminatofit_dev@localhost:5432/daminatofit
+      DATABASE_URL_APP: postgres://app_user:app_user_dev@localhost:5432/daminatofit
+      DATABASE_URL_ADMIN: postgres://app_admin:app_admin_dev@localhost:5432/daminatofit
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
@@ -27,6 +56,8 @@ jobs:
       - run: pnpm format:check
       - run: pnpm lint
       - run: pnpm typecheck
+      - name: Dependency audit
+        run: pnpm deps:audit
       - run: pnpm test
       - name: Resolve app config for every brand
         run: |

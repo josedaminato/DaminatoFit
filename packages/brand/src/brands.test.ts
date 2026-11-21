@@ -1,11 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import {
   BRAND_IDS,
+  REALM_IDS,
   WCAG_AA_NORMAL_TEXT,
   brands,
   contrastRatio,
   getBrand,
   isBrandId,
+  realmForBrand,
   type ColorPalette,
 } from './index';
 
@@ -34,6 +36,36 @@ describe('brand registry', () => {
   it('keeps PupiApp closed to new trainers and DaminatoFit open', () => {
     expect(brands.pupiapp.trainerSignup).toBe('closed');
     expect(brands.daminatofit.trainerSignup).toBe('open');
+  });
+
+  it('distributes DaminatoFit as the platform and PupiApp as a single-trainer standalone app', () => {
+    expect(brands.daminatofit).toMatchObject({
+      distribution: 'platform',
+      authRealm: 'daminatofit',
+      maxTenants: null,
+    });
+    expect(brands.pupiapp).toMatchObject({
+      distribution: 'standalone',
+      authRealm: 'pupiapp',
+      maxTenants: 1,
+    });
+  });
+
+  it.each(allBrands)('$id: closed signup implies exactly one tenant', (brand) => {
+    if (brand.trainerSignup === 'closed') expect(brand.maxTenants).toBe(1);
+    if (brand.maxTenants !== null) expect(brand.maxTenants).toBeGreaterThan(0);
+  });
+
+  it.each(allBrands)('$id uses a known realm', (brand) => {
+    expect(REALM_IDS).toContain(brand.authRealm);
+    expect(realmForBrand(brand.id)).toBe(brand.authRealm);
+  });
+
+  it('never shares the realm of a standalone brand with another brand', () => {
+    for (const brand of allBrands.filter((b) => b.distribution === 'standalone')) {
+      const sharing = allBrands.filter((b) => b.authRealm === brand.authRealm);
+      expect(sharing.map((b) => b.id)).toEqual([brand.id]);
+    }
   });
 
   it('resolves known brands and rejects unknown ones', () => {

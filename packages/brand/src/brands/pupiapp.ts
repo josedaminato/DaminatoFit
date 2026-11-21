@@ -13,5 +13,8 @@ export const pupiapp: BrandConfig = {
     dark: { ...neutralDark, primary: '#A78BFA', onPrimary: '#1E1B4B' },
   },
   links: { privacyPolicy: null, terms: null, support: null },
+  distribution: 'standalone',
+  authRealm: 'pupiapp',
   trainerSignup: 'closed',
+  maxTenants: 1,
 };
