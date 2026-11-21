@@ -15,6 +15,7 @@ Plataforma móvil para entrenadores personales y alumnos. Una sola base de códi
 | 2 Autenticación, cuentas e invitaciones | Completada |
 | 2.1 Cierre (reset + borrado de cuenta)  | Completada |
 | 3 Biblioteca y videos                   | Completada |
+| 4 Rutinas versionadas                   | Completada |
 
 ## Requisitos
 
@@ -55,10 +56,17 @@ pnpm mobile:daminatofit   # o: pnpm mobile:pupiapp
 
 - Biblioteca **global** (solo lectura) + biblioteca **personal** del entrenador.
 - Personalizar un ejercicio global sin mutar el original (revisión propia + `based_on_exercise_id`).
-- Videos: PUT firmado a RustFS → confirmación con validación en servidor (magic bytes, tamaño, SHA-256; duración con `ffprobe` opcional) → reproducción con URL firmada **sin autoplay**.
+- Videos: PUT firmado a RustFS → confirmación con validación en servidor (magic bytes, tamaño, SHA-256 y **ffprobe obligatorio** vía `ffprobe-static`) → URL firmada **sin autoplay**.
 - Deduplicación por tenant, rechazo de borrado si el archivo sigue referenciado, uso en `tenant_usage`.
 - Límites técnicos y recorrido local: [`docs/fase-3-media-y-biblioteca.md`](./docs/fase-3-media-y-biblioteca.md).
-- **Emulador/dispositivo:** no verificado en esta máquina; la integración real se cubre con PostgreSQL + RustFS en la API.
+
+## Fase 4 — rutinas
+
+- Plantillas versionadas, borrador/publicación, días con `week_index`, series prescritas.
+- Asignación a varios alumnos; personalización individual sin afectar al resto; historial al reemplazar.
+- Alumno: consulta de rutina vigente (sin registro de series — Fase 5).
+- Detalle: [`docs/fase-4-rutinas.md`](./docs/fase-4-rutinas.md).
+- **Emulador/dispositivo:** no verificado en esta máquina; API + PostgreSQL reales en la suite de integración.
 
 ## Comandos
 

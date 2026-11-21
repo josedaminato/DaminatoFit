@@ -40,6 +40,11 @@ export const RLS_REQUIRED_TABLES = [
   'exercise_revisions',
   'exercise_muscle_groups',
   'tenant_usage',
+  'routine_plans',
+  'routine_versions',
+  'routine_version_days',
+  'routine_version_exercises',
+  'routine_version_sets',
   'audit_logs',
 ] as const;
 
@@ -55,5 +60,10 @@ export const TENANT_ID_TABLES = [
   'exercises',
   'exercise_revisions',
   'tenant_usage',
+  'routine_plans',
+  'routine_versions',
+  'routine_version_days',
+  'routine_version_exercises',
+  'routine_version_sets',
   'audit_logs',
 ] as const;

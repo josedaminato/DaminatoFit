@@ -4,16 +4,17 @@
 
 No son política comercial. Ajustables por entorno:
 
-| Variable                         | Default               | Motivo                                                                     |
-| -------------------------------- | --------------------- | -------------------------------------------------------------------------- |
-| `MEDIA_MAX_BYTES`                | 52 428 800 (50 MiB)   | Caber en móviles sin transcodificar; control de costo.                     |
-| `MEDIA_MAX_DURATION_MS`          | 180 000 (3 min)       | Videos de apoyo cortos; requiere `ffprobe` si está disponible.             |
-| `MEDIA_UPLOAD_URL_TTL_SECONDS`   | 900 (15 min)          | Ventana de PUT firmado.                                                    |
-| `MEDIA_PLAYBACK_URL_TTL_SECONDS` | 300 (5 min)           | Lectura firmada de corta duración.                                         |
-| `DEFAULT_STORAGE_QUOTA_BYTES`    | 536 870 912 (512 MiB) | Tope técnico por entrenador; base para cuotas futuras.                     |
-| `FFPROBE_PATH`                   | opcional              | Si falta, se validan contenedor (magic bytes) y tamaño, no duración/códec. |
+| Variable                         | Default                     | Motivo                                                           |
+| -------------------------------- | --------------------------- | ---------------------------------------------------------------- |
+| `MEDIA_MAX_BYTES`                | 52 428 800 (50 MiB)         | Caber en móviles sin transcodificar; control de costo.           |
+| `MEDIA_MAX_DURATION_MS`          | 180 000 (3 min)             | Videos de apoyo cortos; duración verificada con ffprobe.         |
+| `MEDIA_UPLOAD_URL_TTL_SECONDS`   | 900 (15 min)                | Ventana de PUT firmado.                                          |
+| `MEDIA_PLAYBACK_URL_TTL_SECONDS` | 300 (5 min)                 | Lectura firmada de corta duración.                               |
+| `MEDIA_PROBE_TIMEOUT_MS`         | 15 000                      | Timeout del proceso ffprobe.                                     |
+| `DEFAULT_STORAGE_QUOTA_BYTES`    | 536 870 912 (512 MiB)       | Tope técnico por entrenador; base para cuotas futuras.           |
+| `FFPROBE_PATH`                   | opcional (`ffprobe-static`) | **Obligatorio** para `ready`. Sin binario → `probe_unavailable`. |
 
-Formatos aceptados tras inspección en el servidor: **MP4** (`video/mp4`). El cliente puede declarar también QuickTime; el backend rechaza si el contenedor real no es MP4.
+Formatos aceptados tras inspección en el servidor: contenedor detectado por magic bytes **y** ffprobe con duración > 0. Sin verificación completa el archivo no queda disponible.
 
 ## Flujo local de carga y reproducción
 
@@ -21,7 +22,7 @@ Formatos aceptados tras inspección en el servidor: **MP4** (`video/mp4`). El cl
 2. `pnpm db:migrate` (incluye seed de ~6 ejercicios globales y catálogos).
 3. `pnpm dev:api`.
 4. Entrenador autenticado → `POST /v1/media/uploads` → `PUT` a la URL firmada → `POST /v1/media/:id/confirm`.
-5. El confirm descarga el objeto, calcula SHA-256, valida magic/tamaño/(ffprobe), deduplica por tenant y marca `ready`.
+5. El confirm descarga el objeto, calcula SHA-256, valida magic/tamaño/**ffprobe obligatorio**, deduplica por tenant y marca `ready` (o rechaza).
 6. Reproducción: `GET /v1/media/:id/playback-url` → URL firmada; la app **no** autoplay (`autoplay: false` / `shouldPlay={false}`).
 7. Consola RustFS: http://127.0.0.1:9001 (credenciales de `.env`).
 

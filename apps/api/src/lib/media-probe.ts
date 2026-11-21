@@ -1,6 +1,7 @@
 import { spawn } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { fileTypeFromBuffer } from 'file-type';
+import ffprobeStatic from 'ffprobe-static';
 import type { Env } from '../config/env';
 
 export interface MediaProbeResult {
@@ -16,47 +17,63 @@ export interface MediaProbeResult {
   rejectionReason: string | null;
 }
 
+function resolveFfprobePath(env: Env): string {
+  return env.FFPROBE_PATH?.trim() || ffprobeStatic.path;
+}
+
 function run(
   command: string,
   args: string[],
+  timeoutMs: number,
 ): Promise<{ code: number | null; stdout: string; stderr: string }> {
   return new Promise((resolve, reject) => {
     const child = spawn(command, args, { windowsHide: true });
     let stdout = '';
     let stderr = '';
+    const timer = setTimeout(() => {
+      child.kill('SIGKILL');
+      reject(new Error('ffprobe_timeout'));
+    }, timeoutMs);
     child.stdout.on('data', (d: Buffer) => {
       stdout += d.toString('utf8');
     });
     child.stderr.on('data', (d: Buffer) => {
       stderr += d.toString('utf8');
     });
-    child.on('error', reject);
-    child.on('close', (code) => resolve({ code, stdout, stderr }));
+    child.on('error', (err) => {
+      clearTimeout(timer);
+      reject(err);
+    });
+    child.on('close', (code) => {
+      clearTimeout(timer);
+      resolve({ code, stdout, stderr });
+    });
   });
 }
 
 async function ffprobeMeta(
   env: Env,
   filePath: string,
-): Promise<{
-  durationMs: number | null;
-  width: number | null;
-  height: number | null;
-  codec: string | null;
-}> {
-  const bin = env.FFPROBE_PATH ?? 'ffprobe';
+): Promise<
+  | {
+      ok: true;
+      durationMs: number;
+      width: number | null;
+      height: number | null;
+      codec: string | null;
+    }
+  | { ok: false; reason: 'probe_unavailable' | 'probe_failed' | 'duration_unverified' }
+> {
+  const bin = resolveFfprobePath(env);
+  const timeoutMs = env.MEDIA_PROBE_TIMEOUT_MS;
   try {
-    const { code, stdout } = await run(bin, [
-      '-v',
-      'quiet',
-      '-print_format',
-      'json',
-      '-show_format',
-      '-show_streams',
-      filePath,
-    ]);
+    const { code, stdout } = await run(
+      bin,
+      ['-v', 'quiet', '-print_format', 'json', '-show_format', '-show_streams', filePath],
+      timeoutMs,
+    );
     if (code !== 0) {
-      return { durationMs: null, width: null, height: null, codec: null };
+      return { ok: false, reason: 'probe_failed' };
     }
     const json = JSON.parse(stdout) as {
       format?: { duration?: string };
@@ -68,119 +85,110 @@ async function ffprobeMeta(
       }>;
     };
     const durationSec = json.format?.duration ? Number(json.format.duration) : NaN;
+    if (!Number.isFinite(durationSec) || durationSec <= 0) {
+      return { ok: false, reason: 'duration_unverified' };
+    }
     const video = json.streams?.find((s) => s.codec_type === 'video');
+    if (!video) {
+      return { ok: false, reason: 'probe_failed' };
+    }
     return {
-      durationMs: Number.isFinite(durationSec) ? Math.round(durationSec * 1000) : null,
-      width: video?.width ?? null,
-      height: video?.height ?? null,
-      codec: video?.codec_name ?? null,
+      ok: true,
+      durationMs: Math.round(durationSec * 1000),
+      width: video.width ?? null,
+      height: video.height ?? null,
+      codec: video.codec_name ?? null,
     };
-  } catch {
-    return { durationMs: null, width: null, height: null, codec: null };
+  } catch (error) {
+    if (error instanceof Error && error.message === 'ffprobe_timeout') {
+      return { ok: false, reason: 'probe_failed' };
+    }
+    return { ok: false, reason: 'probe_unavailable' };
   }
+}
+
+function fail(
+  sha256: string,
+  sizeBytes: number,
+  rejectionReason: string,
+  partial: Partial<MediaProbeResult> = {},
+): MediaProbeResult {
+  return {
+    sha256,
+    sizeBytes,
+    container: partial.container ?? null,
+    mime: partial.mime ?? null,
+    durationMs: partial.durationMs ?? null,
+    width: partial.width ?? null,
+    height: partial.height ?? null,
+    videoCodec: partial.videoCodec ?? null,
+    ok: false,
+    rejectionReason,
+  };
 }
 
 /**
  * Server-side validation. Does not trust client MIME/extension.
- * Duration uses ffprobe when available; otherwise only container+size are enforced.
+ * Duration and container inspection via ffprobe are mandatory before ready.
  */
 export async function probeVideoBuffer(env: Env, buffer: Buffer): Promise<MediaProbeResult> {
   const sha256 = createHash('sha256').update(buffer).digest('hex');
   const sizeBytes = buffer.byteLength;
 
   if (sizeBytes <= 0) {
-    return {
-      sha256,
-      sizeBytes,
-      container: null,
-      mime: null,
-      durationMs: null,
-      width: null,
-      height: null,
-      videoCodec: null,
-      ok: false,
-      rejectionReason: 'empty_file',
-    };
+    return fail(sha256, sizeBytes, 'empty_file');
   }
 
   if (sizeBytes > env.MEDIA_MAX_BYTES) {
-    return {
-      sha256,
-      sizeBytes,
-      container: null,
-      mime: null,
-      durationMs: null,
-      width: null,
-      height: null,
-      videoCodec: null,
-      ok: false,
-      rejectionReason: 'file_too_large',
-    };
+    return fail(sha256, sizeBytes, 'file_too_large');
   }
 
   const detected = await fileTypeFromBuffer(buffer);
   const mime = detected?.mime ?? null;
   const allowed = mime === 'video/mp4' || mime === 'video/quicktime';
   if (!allowed) {
-    return {
-      sha256,
-      sizeBytes,
+    return fail(sha256, sizeBytes, 'invalid_format', {
       container: detected?.ext ?? null,
       mime,
-      durationMs: null,
-      width: null,
-      height: null,
-      videoCodec: null,
-      ok: false,
-      rejectionReason: 'invalid_format',
-    };
+    });
   }
 
   const fs = await import('node:fs/promises');
   const os = await import('node:os');
   const path = await import('node:path');
   const tmp = path.join(os.tmpdir(), `df-media-${sha256.slice(0, 16)}.mp4`);
-  let durationMs: number | null = null;
-  let width: number | null = null;
-  let height: number | null = null;
-  let videoCodec: string | null = null;
 
   try {
     await fs.writeFile(tmp, buffer);
     const probed = await ffprobeMeta(env, tmp);
-    durationMs = probed.durationMs;
-    width = probed.width;
-    height = probed.height;
-    videoCodec = probed.codec;
-  } finally {
-    await fs.unlink(tmp).catch(() => undefined);
-  }
+    if (!probed.ok) {
+      return fail(sha256, sizeBytes, probed.reason, { container: 'mp4', mime });
+    }
 
-  if (durationMs !== null && durationMs > env.MEDIA_MAX_DURATION_MS) {
+    if (probed.durationMs > env.MEDIA_MAX_DURATION_MS) {
+      return fail(sha256, sizeBytes, 'duration_too_long', {
+        container: 'mp4',
+        mime,
+        durationMs: probed.durationMs,
+        width: probed.width,
+        height: probed.height,
+        videoCodec: probed.codec,
+      });
+    }
+
     return {
       sha256,
       sizeBytes,
       container: 'mp4',
       mime,
-      durationMs,
-      width,
-      height,
-      videoCodec,
-      ok: false,
-      rejectionReason: 'duration_too_long',
+      durationMs: probed.durationMs,
+      width: probed.width,
+      height: probed.height,
+      videoCodec: probed.codec,
+      ok: true,
+      rejectionReason: null,
     };
+  } finally {
+    await fs.unlink(tmp).catch(() => undefined);
   }
-
-  return {
-    sha256,
-    sizeBytes,
-    container: 'mp4',
-    mime,
-    durationMs,
-    width,
-    height,
-    videoCodec,
-    ok: true,
-    rejectionReason: null,
-  };
 }

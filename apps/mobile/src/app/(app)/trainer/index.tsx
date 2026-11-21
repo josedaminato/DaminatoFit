@@ -21,6 +21,9 @@ export default function TrainerHomeScreen() {
         <Link href="/trainer/students" asChild>
           <Button label="Alumnos e invitaciones" onPress={() => undefined} />
         </Link>
+        <Link href="/trainer/routines" asChild>
+          <Button label="Rutinas" onPress={() => undefined} />
+        </Link>
         <Link href="/trainer/profile" asChild>
           <Button label="Perfil público" variant="secondary" onPress={() => undefined} />
         </Link>

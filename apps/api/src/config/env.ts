@@ -35,7 +35,10 @@ const EnvSchema = z.object({
   MEDIA_MAX_DURATION_MS: z.coerce.number().int().positive().default(180_000),
   MEDIA_UPLOAD_URL_TTL_SECONDS: z.coerce.number().int().positive().default(900),
   MEDIA_PLAYBACK_URL_TTL_SECONDS: z.coerce.number().int().positive().default(300),
+  /** Hard timeout for ffprobe child process (VPS-safe). */
+  MEDIA_PROBE_TIMEOUT_MS: z.coerce.number().int().positive().default(15_000),
   DEFAULT_STORAGE_QUOTA_BYTES: z.coerce.number().int().positive().default(536_870_912),
+  /** Optional override; defaults to bundled ffprobe-static binary. */
   FFPROBE_PATH: z.string().min(1).optional(),
 });
 
