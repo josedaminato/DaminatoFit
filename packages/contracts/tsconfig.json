@@ -1,0 +1,4 @@
+{
+  "extends": "@daminatofit/config/tsconfig.base.json",
+  "include": ["src"]
+}

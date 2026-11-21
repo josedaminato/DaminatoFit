@@ -1,0 +1,13 @@
+**/node_modules
+**/dist
+**/.expo
+**/coverage
+.git
+.env
+.env.*
+docs
+*.md
+
+# The API image only needs the mobile manifest so the pnpm workspace resolves.
+apps/mobile/*
+!apps/mobile/package.json

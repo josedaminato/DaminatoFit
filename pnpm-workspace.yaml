@@ -1,0 +1,9 @@
+packages:
+  - 'apps/*'
+  - 'packages/*'
+
+# React Native tooling still assumes a flat node_modules in several places.
+nodeLinker: hoisted
+
+onlyBuiltDependencies:
+  - esbuild
