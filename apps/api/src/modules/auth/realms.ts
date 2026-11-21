@@ -27,10 +27,15 @@ export function createAuthForRealm(realm: RealmId, db: Db, env: Env, domainSql: 
     throw new Error(`No brand mapped to realm ${realm}`);
   }
 
+  const adminOrigins = env.ADMIN_WEB_ORIGINS.split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+
   const trustedOrigins = [
     `${brand.scheme}://`,
     `${brand.scheme}://*`,
     env.API_PUBLIC_URL,
+    ...(realm === 'daminatofit' ? adminOrigins : []),
     ...(env.NODE_ENV === 'development'
       ? ['exp://', 'exp://**', 'http://127.0.0.1:8081', 'http://localhost:8081']
       : []),

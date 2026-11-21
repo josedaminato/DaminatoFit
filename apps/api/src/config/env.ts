@@ -56,6 +56,13 @@ const EnvSchema = z.object({
   ANNOUNCEMENTS_PER_DAY: z.coerce.number().int().positive().max(100).default(20),
   DIRECT_MESSAGES_PER_HOUR: z.coerce.number().int().positive().max(200).default(40),
   DIRECT_MESSAGES_PER_RECIPIENT_PER_DAY: z.coerce.number().int().positive().max(50).default(10),
+  /** Comma-separated browser origins allowed for the admin SPA (Better Auth trustedOrigins). */
+  ADMIN_WEB_ORIGINS: z.string().default('http://127.0.0.1:5173,http://localhost:5173'),
+  /**
+   * Required for the local admin provisioning CLI only.
+   * Never ship a default admin account. Omit in environments that must not create admins.
+   */
+  PLATFORM_ADMIN_PROVISION_SECRET: z.string().min(16).optional(),
 });
 
 export type Env = z.infer<typeof EnvSchema>;

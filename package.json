@@ -8,6 +8,7 @@
   },
   "scripts": {
     "dev:api": "pnpm --filter @daminatofit/api dev",
+    "dev:admin": "pnpm --filter @daminatofit/admin dev",
     "mobile:daminatofit": "pnpm --filter @daminatofit/mobile start:daminatofit",
     "mobile:pupiapp": "pnpm --filter @daminatofit/mobile start:pupiapp",
     "infra:up": "docker compose -f infra/docker/compose.yml up -d",

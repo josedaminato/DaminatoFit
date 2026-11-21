@@ -21,6 +21,14 @@ export default defineConfig([
     languageOptions: { globals: globals.node },
   },
   {
+    files: ['apps/admin/**/*.{ts,tsx}'],
+    extends: [js.configs.recommended, tseslint.configs.recommended],
+    languageOptions: {
+      globals: { ...globals.browser, ...globals.es2023 },
+      parserOptions: { ecmaFeatures: { jsx: true } },
+    },
+  },
+  {
     files: ['apps/mobile/**/*.{js,ts,tsx}'],
     extends: [expoConfig],
     settings: {

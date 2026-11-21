@@ -1,3 +1,4 @@
+export * from './admin';
 export * from './announcements';
 export * from './audit';
 export * from './auth-tables';
@@ -21,6 +22,10 @@ export const GLOBAL_OR_IDENTITY_TABLES = [
   'announcement_reads',
   'push_devices',
   'notification_preferences',
+  'commercial_rule_versions',
+  'referral_attributions',
+  'platform_admin_audit',
+  'platform_metric_snapshots',
   'schema_migrations',
 ] as const;
 
@@ -54,6 +59,10 @@ export const RLS_REQUIRED_TABLES = [
   'push_devices',
   'notification_preferences',
   'notification_deliveries',
+  'commercial_rule_versions',
+  'referral_attributions',
+  'platform_admin_audit',
+  'platform_metric_snapshots',
 ] as const;
 
 /** Tables that carry an explicit tenant_id column. */

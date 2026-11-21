@@ -74,6 +74,9 @@ describe('isolation level 1 — RLS catalogue', () => {
       'push_devices',
       'notification_preferences',
       'notification_deliveries',
+      'referral_attributions',
+      'platform_admin_audit',
+      'platform_metric_snapshots',
     ];
     for (const table of tables) {
       const rows = await app.sql.unsafe(`SELECT count(*)::int AS n FROM ${table}`);

@@ -19,6 +19,7 @@ Plataforma móvil para entrenadores personales y alumnos. Una sola base de códi
 | 5 Entrenamientos y progreso             | Completada |
 | 5.1 Apariencia del entrenador           | Completada |
 | 6 Avisos, mensajes y notificaciones     | Completada |
+| 7 Panel admin DaminatoFit               | Completada |
 
 ## Requisitos
 
@@ -31,11 +32,13 @@ Plataforma móvil para entrenadores personales y alumnos. Una sola base de códi
 pnpm install
 Copy-Item .env.example .env
 Copy-Item apps/mobile/.env.example apps/mobile/.env
+Copy-Item apps/admin/.env.example apps/admin/.env
 pnpm infra:up
 pnpm db:migrate
 pnpm check
 pnpm dev:api
 pnpm mobile:daminatofit   # o: pnpm mobile:pupiapp
+pnpm dev:admin            # panel web local (requiere admin provisionado)
 ```
 
 | Servicio          | Dirección local                                             |
@@ -84,6 +87,13 @@ pnpm mobile:daminatofit   # o: pnpm mobile:pupiapp
 - Cola de push idempotente. El adaptador local es un mock: no se enviaron notificaciones a teléfonos. Detalle: [`docs/fase-6-comunicacion.md`](./docs/fase-6-comunicacion.md).
 - Requisitos de tiendas, todavía sin trámites: [`docs/publicacion/`](./docs/publicacion/).
 
+## Fase 7 — panel admin DaminatoFit
+
+- App web `apps/admin` (Vite + React) y API `/v1/admin/*` solo para `platform_admin` del reino DaminatoFit.
+- Dashboard, entrenadores, alumnos/membresías, estadísticas, estimaciones comerciales, almacenamiento, configuración versionada y auditoría.
+- Estimaciones (USD 2 / alumno simulado, tope USD 20) claramente separadas de cobros reales (aún 0). MFA pendiente antes de internet.
+- Provisionamiento local: `pnpm --filter @daminatofit/api admin:provision`. Detalle: [`docs/fase-7-admin.md`](./docs/fase-7-admin.md).
+
 ## Comandos
 
 | Comando                        | Qué hace                                                                   |
@@ -94,12 +104,14 @@ pnpm mobile:daminatofit   # o: pnpm mobile:pupiapp
 | `pnpm secrets:scan`            | Escaneo de secretos con Gitleaks (Docker)                                  |
 | `pnpm deps:audit`              | Auditoría de dependencias de producción (umbral: high)                     |
 | `pnpm infra:up` / `infra:down` | Infraestructura local                                                      |
+| `pnpm dev:admin`               | Panel web administrativo (Vite)                                            |
 
 ## Estructura
 
 ```
 apps/api            Fastify + Better Auth + Drizzle + RLS + pruebas
 apps/mobile         Expo (auth, entrenador, alumno, invitaciones)
+apps/admin          Panel web DaminatoFit Admin
 packages/brand      Marcas, distribution, authRealm, contraste
 packages/contracts  Esquemas Zod compartidos
 packages/config     TypeScript base

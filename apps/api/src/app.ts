@@ -17,6 +17,7 @@ import { createPushAdapter, type PushAdapter } from './modules/notifications/pus
 import { routinesRoutes } from './modules/routines/routines.routes';
 import { progressRoutes } from './modules/workouts/progress.routes';
 import { workoutsRoutes } from './modules/workouts/workouts.routes';
+import { adminRoutes } from './modules/admin/admin.routes';
 import { trainersRoutes } from './modules/trainers/trainers.routes';
 
 export interface AppResources {
@@ -114,6 +115,12 @@ export async function buildApp(
       messagesPerHour: env.DIRECT_MESSAGES_PER_HOUR,
       messagesPerRecipientPerDay: env.DIRECT_MESSAGES_PER_RECIPIENT_PER_DAY,
     },
+  });
+  await app.register(adminRoutes, {
+    auths,
+    appSql: appDb.sql,
+    migratorSql: migrator.sql,
+    env,
   });
 
   app.addHook('onClose', async () => {

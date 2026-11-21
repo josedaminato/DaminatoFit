@@ -9,6 +9,7 @@
     "start": "node dist/server.cjs",
     "db:migrate": "tsx --env-file-if-exists=../../.env src/db/migrate.ts",
     "notifications:once": "tsx --env-file-if-exists=../../.env src/notification-worker.ts",
+    "admin:provision": "tsx --env-file-if-exists=../../.env src/admin-provision.ts",
     "typecheck": "tsc -p tsconfig.json",
     "test": "node --env-file-if-exists=../../.env ../../node_modules/vitest/vitest.mjs run"
   },
