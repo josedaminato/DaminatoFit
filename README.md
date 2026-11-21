@@ -7,14 +7,14 @@ Plataforma móvil para entrenadores personales y alumnos. Una sola base de códi
 
 ## Estado
 
-| Fase                                    | Estado                  |
-| --------------------------------------- | ----------------------- |
-| 0 Fundaciones                           | Completada              |
-| 0.1 Alineación (marcas, seguridad CI)   | Completada              |
-| 1 Base de datos + RLS                   | Completada              |
-| 2 Autenticación, cuentas e invitaciones | Completada              |
-| 2.1 Cierre (reset + borrado de cuenta)  | Completada              |
-| 3 Biblioteca y videos                   | Pendiente de aprobación |
+| Fase                                    | Estado     |
+| --------------------------------------- | ---------- |
+| 0 Fundaciones                           | Completada |
+| 0.1 Alineación (marcas, seguridad CI)   | Completada |
+| 1 Base de datos + RLS                   | Completada |
+| 2 Autenticación, cuentas e invitaciones | Completada |
+| 2.1 Cierre (reset + borrado de cuenta)  | Completada |
+| 3 Biblioteca y videos                   | Completada |
 
 ## Requisitos
 
@@ -50,6 +50,15 @@ pnpm mobile:daminatofit   # o: pnpm mobile:pupiapp
 - **Eliminación:** Ajustes → confirmar `ELIMINAR` + contraseña (ver `docs/privacy-account-deletion.md`).
 - **PupiApp:** sin alta libre de entrenadores; bootstrap con `PUPIAPP_BOOTSTRAP_SECRET`.
 - **Verificación en dispositivo:** `docs/fase-2.1-verificacion-manual.md`
+
+## Fase 3 — biblioteca y videos
+
+- Biblioteca **global** (solo lectura) + biblioteca **personal** del entrenador.
+- Personalizar un ejercicio global sin mutar el original (revisión propia + `based_on_exercise_id`).
+- Videos: PUT firmado a RustFS → confirmación con validación en servidor (magic bytes, tamaño, SHA-256; duración con `ffprobe` opcional) → reproducción con URL firmada **sin autoplay**.
+- Deduplicación por tenant, rechazo de borrado si el archivo sigue referenciado, uso en `tenant_usage`.
+- Límites técnicos y recorrido local: [`docs/fase-3-media-y-biblioteca.md`](./docs/fase-3-media-y-biblioteca.md).
+- **Emulador/dispositivo:** no verificado en esta máquina; la integración real se cubre con PostgreSQL + RustFS en la API.
 
 ## Comandos
 

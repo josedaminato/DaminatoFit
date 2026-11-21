@@ -9,6 +9,8 @@ import { createAuthRealms } from './modules/auth/realms';
 import { healthRoutes } from './modules/health/health.routes';
 import { invitationsRoutes } from './modules/invitations/invitations.routes';
 import { meRoutes } from './modules/me/me.routes';
+import { exercisesRoutes } from './modules/exercises/exercises.routes';
+import { mediaRoutes } from './modules/media/media.routes';
 import { trainersRoutes } from './modules/trainers/trainers.routes';
 
 export interface AppResources {
@@ -62,6 +64,17 @@ export async function buildApp(
     env,
   });
   await app.register(meRoutes, { auths, appSql: appDb.sql });
+  await app.register(exercisesRoutes, {
+    auths,
+    appSql: appDb.sql,
+    migratorSql: migrator.sql,
+  });
+  await app.register(mediaRoutes, {
+    auths,
+    appSql: appDb.sql,
+    migratorSql: migrator.sql,
+    env,
+  });
 
   app.addHook('onClose', async () => {
     if (owned) {

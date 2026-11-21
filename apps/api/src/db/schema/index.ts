@@ -16,6 +16,7 @@ export const GLOBAL_OR_IDENTITY_TABLES = [
   'users',
   'tenants',
   'muscle_groups',
+  'equipment',
   'announcement_reads',
   'schema_migrations',
 ] as const;
@@ -33,6 +34,12 @@ export const RLS_REQUIRED_TABLES = [
   'announcement_reads',
   'direct_messages',
   'muscle_groups',
+  'equipment',
+  'media_assets',
+  'exercises',
+  'exercise_revisions',
+  'exercise_muscle_groups',
+  'tenant_usage',
   'audit_logs',
 ] as const;
 
@@ -44,5 +51,9 @@ export const TENANT_ID_TABLES = [
   'trainer_profiles',
   'announcements',
   'direct_messages',
+  'media_assets',
+  'exercises',
+  'exercise_revisions',
+  'tenant_usage',
   'audit_logs',
 ] as const;

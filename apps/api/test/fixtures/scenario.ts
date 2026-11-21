@@ -118,10 +118,17 @@ export async function seedScenario(sql: Sql): Promise<ScenarioIds> {
       (${ids.messages.toS2T1}, ${ids.tenants.t1}, ${ids.users.trainerA}, ${ids.memberships.s2T1}, 'Private for S2 in T1')
   `;
 
-  await sql`
-    INSERT INTO muscle_groups (id, slug, name) VALUES
-      (${ids.muscleGroupId}, 'chest', 'Pecho')
+  const existingMuscle = await sql<{ id: string }[]>`
+    SELECT id FROM muscle_groups WHERE slug = 'chest' LIMIT 1
   `;
+  if (existingMuscle[0]) {
+    ids.muscleGroupId = existingMuscle[0].id;
+  } else {
+    await sql`
+      INSERT INTO muscle_groups (id, slug, name) VALUES
+        (${ids.muscleGroupId}, 'chest', 'Pecho')
+    `;
+  }
 
   return ids;
 }

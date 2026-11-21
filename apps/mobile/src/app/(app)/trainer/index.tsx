@@ -15,6 +15,9 @@ export default function TrainerHomeScreen() {
         Hola, {me?.user.displayName}. Espacio activo: {activeMembership?.tenantName ?? '—'}
       </Text>
       <View style={styles.actions}>
+        <Link href="/trainer/exercises" asChild>
+          <Button label="Biblioteca de ejercicios" onPress={() => undefined} />
+        </Link>
         <Link href="/trainer/students" asChild>
           <Button label="Alumnos e invitaciones" onPress={() => undefined} />
         </Link>

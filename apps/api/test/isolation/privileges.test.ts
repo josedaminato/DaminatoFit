@@ -32,15 +32,17 @@ describe('database privileges', () => {
   });
 
   it('allows app_admin to manage the global catalogue while app_user cannot', async () => {
-    await admin.sql`INSERT INTO muscle_groups (slug, name) VALUES ('shoulders', 'Hombros')`;
+    await admin.sql`
+      INSERT INTO muscle_groups (slug, name) VALUES ('priv-test-shoulders', 'Hombros (test)')
+    `;
 
     const count = await admin.sql<{ n: number }[]>`
-      SELECT count(*)::int AS n FROM muscle_groups WHERE slug = 'shoulders'
+      SELECT count(*)::int AS n FROM muscle_groups WHERE slug = 'priv-test-shoulders'
     `;
     expect(count[0]?.n).toBe(1);
 
     await expect(
-      app.sql`INSERT INTO muscle_groups (slug, name) VALUES ('legs', 'Piernas')`,
+      app.sql`INSERT INTO muscle_groups (slug, name) VALUES ('priv-test-legs', 'Piernas (test)')`,
     ).rejects.toThrow();
   });
 });
