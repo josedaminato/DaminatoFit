@@ -43,6 +43,19 @@ const EnvSchema = z.object({
   DEFAULT_STORAGE_QUOTA_BYTES: z.coerce.number().int().positive().default(536_870_912),
   /** Optional override; defaults to bundled ffprobe-static binary. */
   FFPROBE_PATH: z.string().min(1).optional(),
+  /**
+   * Push delivery. `mock` never contacts Expo or a device.
+   * `expo` requires EXPO_ACCESS_TOKEN; without it sends stay failed and retry.
+   */
+  PUSH_PROVIDER: z.enum(['mock', 'expo']).default('mock'),
+  EXPO_ACCESS_TOKEN: z.string().min(1).optional(),
+  PUSH_AUTOPROCESS: z
+    .enum(['true', 'false'])
+    .default('true')
+    .transform((value) => value === 'true'),
+  ANNOUNCEMENTS_PER_DAY: z.coerce.number().int().positive().max(100).default(20),
+  DIRECT_MESSAGES_PER_HOUR: z.coerce.number().int().positive().max(200).default(40),
+  DIRECT_MESSAGES_PER_RECIPIENT_PER_DAY: z.coerce.number().int().positive().max(50).default(10),
 });
 
 export type Env = z.infer<typeof EnvSchema>;

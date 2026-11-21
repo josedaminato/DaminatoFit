@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react';
-import { Link, type Href } from 'expo-router';
+import { useCallback, useEffect, useState } from 'react';
+import { Link, useFocusEffect, type Href } from 'expo-router';
 import { StyleSheet, Text, View } from 'react-native';
 import { useBrand } from '@/brand/BrandProvider';
+import { getUnread } from '@/features/communications/api';
 import { listStudentRoutines } from '@/features/routines/routine-api';
 import type { StudentRoutineListItem } from '@/features/routines/types';
 import { getActiveLocalSession } from '@/features/workouts/local-db';
@@ -20,6 +21,7 @@ export default function StudentHomeScreen() {
   const [error, setError] = useState<string | null>(null);
   const [activePlanId, setActivePlanId] = useState<string | null>(null);
   const [activeDayId, setActiveDayId] = useState<string | null>(null);
+  const [unread, setUnread] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -65,6 +67,22 @@ export default function StudentHomeScreen() {
       cancelled = true;
     };
   }, [activeMembership, apiContext, routines]);
+
+  useFocusEffect(
+    useCallback(() => {
+      let cancelled = false;
+      void getUnread(apiContext)
+        .then((counts) => {
+          if (!cancelled) setUnread(counts.total);
+        })
+        .catch(() => {
+          if (!cancelled) setUnread(0);
+        });
+      return () => {
+        cancelled = true;
+      };
+    }, [apiContext]),
+  );
 
   const primary = routines[0] ?? null;
 
@@ -122,8 +140,14 @@ export default function StudentHomeScreen() {
         <Link href="/student/progress" asChild>
           <Button label="Progreso" variant="secondary" onPress={() => undefined} />
         </Link>
+        <Link href="/student/communications" asChild>
+          <Button
+            label={unread > 0 ? `Avisos y mensajes (${unread})` : 'Avisos y mensajes'}
+            onPress={() => undefined}
+          />
+        </Link>
         <Link href="/student/contact" asChild>
-          <Button label="Contactar entrenador" onPress={() => undefined} />
+          <Button label="Contactar a mi entrenador" onPress={() => undefined} />
         </Link>
         <Link href="/student/select-trainer" asChild>
           <Button label="Cambiar espacio" variant="secondary" onPress={() => undefined} />

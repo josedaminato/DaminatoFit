@@ -29,7 +29,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     },
     predictiveBackGestureEnabled: false,
   },
-  plugins: ['expo-router'],
+  plugins: ['expo-router', 'expo-notifications'],
   experiments: {
     typedRoutes: true,
   },

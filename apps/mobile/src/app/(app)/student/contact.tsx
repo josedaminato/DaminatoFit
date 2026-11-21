@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import { Linking, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { useBrand } from '@/brand/BrandProvider';
+import { openWhatsapp, whatsappUrl } from '@/features/communications/whatsapp';
 import { fetchJson } from '@/lib/api-client';
 import { useSession } from '@/lib/session';
 import type { TrainerProfile } from '@/lib/me-types';
@@ -13,6 +14,7 @@ export default function StudentContactScreen() {
   const { apiContext } = useSession();
   const [profile, setProfile] = useState<TrainerProfile | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [whatsappNote, setWhatsappNote] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -38,14 +40,26 @@ export default function StudentContactScreen() {
               {profile.bio}
             </Text>
           ) : null}
-          {profile.whatsappUrl ? (
+          {profile.whatsappUrl || whatsappUrl(profile.whatsappE164) ? (
             <Button
-              label="Escribir por WhatsApp"
-              onPress={() => void Linking.openURL(profile.whatsappUrl!)}
+              label="Contactar a mi entrenador"
+              onPress={() => {
+                const url = profile.whatsappUrl ?? whatsappUrl(profile.whatsappE164);
+                void openWhatsapp(url).then((result) => {
+                  if (result === 'unavailable') {
+                    setWhatsappNote(
+                      'No se pudo abrir WhatsApp. Probá de nuevo o escribinos desde el navegador con el mismo número.',
+                    );
+                  }
+                });
+              }}
             />
           ) : (
-            <Text style={{ color: colors.textMuted }}>WhatsApp no configurado.</Text>
+            <Text style={{ color: colors.textMuted }}>
+              Tu entrenador todavía no cargó un WhatsApp.
+            </Text>
           )}
+          {whatsappNote ? <Text style={{ color: colors.textMuted }}>{whatsappNote}</Text> : null}
         </View>
       ) : null}
       <ErrorText message={error} />

@@ -82,11 +82,6 @@ Migración: `0007_tenant_appearance.sql`.
 - Configurador: `trainer/appearance` (desde perfil del entrenador).
 - Preview live con `AppearancePreview` (inicio, rutina, ejercicio, progreso) sin persistir hasta Guardar.
 
-## Publicación en tiendas (pendiente de carpeta)
+## Publicación en tiendas
 
-`docs/publicacion/` aún no existe. Al crearla, incluir:
-
-- Uso de logotipos e imágenes subidos por entrenadores (UGC).
-- Derechos de marcas de terceros y responsabilidad del entrenador sobre el material.
-- Diferencia entre personalización interna multi-tenant y publicar apps independientes (PupiApp / white-label).
-- Declaraciones de privacidad sobre almacenamiento de logos en object storage privado con URLs firmadas.
+Esos pendientes quedaron en `docs/publicacion/` (UGC, marcas, PupiApp como app propia y logos en almacenamiento privado). No hay trámites iniciados.

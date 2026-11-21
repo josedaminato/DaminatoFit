@@ -17,6 +17,8 @@ Plataforma móvil para entrenadores personales y alumnos. Una sola base de códi
 | 3 Biblioteca y videos                   | Completada |
 | 4 Rutinas versionadas                   | Completada |
 | 5 Entrenamientos y progreso             | Completada |
+| 5.1 Apariencia del entrenador           | Completada |
+| 6 Avisos, mensajes y notificaciones     | Completada |
 
 ## Requisitos
 
@@ -74,6 +76,13 @@ pnpm mobile:daminatofit   # o: pnpm mobile:pupiapp
 - Historial y progreso (volumen, pesos, cumplimiento) para alumno y entrenador.
 - Detalle: [`docs/fase-5-entrenamientos-offline.md`](./docs/fase-5-entrenamientos-offline.md).
 - **Emulador/dispositivo:** no verificado en esta máquina; integración API + PostgreSQL reales.
+
+## Fase 6 — avisos, mensajes y notificaciones
+
+- Avisos generales (borrador, publicación, archivo) y mensajes del entrenador al alumno. No hay chat ni respuesta.
+- El alumno ve solo el espacio activo, con no leídos, lectura idempotente y WhatsApp del entrenador activo (`https://wa.me/...`).
+- Cola de push idempotente. El adaptador local es un mock: no se enviaron notificaciones a teléfonos. Detalle: [`docs/fase-6-comunicacion.md`](./docs/fase-6-comunicacion.md).
+- Requisitos de tiendas, todavía sin trámites: [`docs/publicacion/`](./docs/publicacion/).
 
 ## Comandos
 

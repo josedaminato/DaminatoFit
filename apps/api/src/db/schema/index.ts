@@ -5,6 +5,7 @@ export * from './brands';
 export * from './invitations';
 export * from './memberships';
 export * from './messages';
+export * from './notifications';
 export * from './muscle-groups';
 export * from './tenants';
 export * from './trainer-profiles';
@@ -18,6 +19,8 @@ export const GLOBAL_OR_IDENTITY_TABLES = [
   'muscle_groups',
   'equipment',
   'announcement_reads',
+  'push_devices',
+  'notification_preferences',
   'schema_migrations',
 ] as const;
 
@@ -48,6 +51,9 @@ export const RLS_REQUIRED_TABLES = [
   'workout_sessions',
   'workout_set_logs',
   'audit_logs',
+  'push_devices',
+  'notification_preferences',
+  'notification_deliveries',
 ] as const;
 
 /** Tables that carry an explicit tenant_id column. */
@@ -70,4 +76,5 @@ export const TENANT_ID_TABLES = [
   'workout_sessions',
   'workout_set_logs',
   'audit_logs',
+  'notification_deliveries',
 ] as const;

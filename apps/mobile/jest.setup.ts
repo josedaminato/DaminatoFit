@@ -21,6 +21,15 @@ jest.mock('expo-font', () => ({
   useFonts: jest.fn(() => [true, null]),
 }));
 
+jest.mock('expo-notifications', () => ({
+  getPermissionsAsync: jest.fn(async () => ({ status: 'undetermined' })),
+  requestPermissionsAsync: jest.fn(async () => ({ status: 'denied' })),
+  getExpoPushTokenAsync: jest.fn(async () => ({ data: '' })),
+  getLastNotificationResponseAsync: jest.fn(async () => null),
+  addNotificationResponseReceivedListener: jest.fn(() => ({ remove: jest.fn() })),
+  setNotificationHandler: jest.fn(),
+}));
+
 jest.mock('expo-sqlite', () => ({
   openDatabaseAsync: jest.fn(async () => ({
     execAsync: jest.fn(async () => undefined),

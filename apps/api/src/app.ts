@@ -12,6 +12,8 @@ import { meRoutes } from './modules/me/me.routes';
 import { exercisesRoutes } from './modules/exercises/exercises.routes';
 import { mediaRoutes } from './modules/media/media.routes';
 import { appearanceRoutes } from './modules/appearance/appearance.routes';
+import { communicationsRoutes } from './modules/communications/communications.routes';
+import { createPushAdapter, type PushAdapter } from './modules/notifications/push-adapter';
 import { routinesRoutes } from './modules/routines/routines.routes';
 import { progressRoutes } from './modules/workouts/progress.routes';
 import { workoutsRoutes } from './modules/workouts/workouts.routes';
@@ -25,6 +27,7 @@ export interface AppResources {
 export async function buildApp(
   env: Env,
   resources?: AppResources,
+  extras?: { pushAdapter?: PushAdapter; autoProcessPush?: boolean },
 ): Promise<{ app: FastifyInstance; resources: AppResources }> {
   requireAuthSecret(env);
   const databaseUrl = requireDatabaseUrl(env);
@@ -98,6 +101,19 @@ export async function buildApp(
     appSql: appDb.sql,
     migratorSql: migrator.sql,
     env,
+  });
+  await app.register(communicationsRoutes, {
+    auths,
+    appSql: appDb.sql,
+    pushAdapter:
+      extras?.pushAdapter ??
+      createPushAdapter({ provider: env.PUSH_PROVIDER, accessToken: env.EXPO_ACCESS_TOKEN }),
+    autoProcessPush: extras?.autoProcessPush ?? env.PUSH_AUTOPROCESS,
+    limits: {
+      announcementsPerDay: env.ANNOUNCEMENTS_PER_DAY,
+      messagesPerHour: env.DIRECT_MESSAGES_PER_HOUR,
+      messagesPerRecipientPerDay: env.DIRECT_MESSAGES_PER_RECIPIENT_PER_DAY,
+    },
   });
 
   app.addHook('onClose', async () => {

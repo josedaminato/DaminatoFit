@@ -465,13 +465,15 @@ El costo de almacenamiento es bajo: son filas de texto, no archivos.
 
 **Comunicación y transversal**
 
-| Tabla                | Columnas principales                                                                                           | Notas                                                      |
-| -------------------- | -------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
-| `announcements`      | `id`, `tenant_id`, `author_user_id`, `title`, `body`, `published_at`, `archived_at`                            | Avisos generales.                                          |
-| `announcement_reads` | `announcement_id`, `membership_id`, `read_at`                                                                  | Estado de lectura.                                         |
-| `direct_messages`    | `id`, `tenant_id`, `sender_user_id`, `recipient_membership_id`, `body`, `created_at`, `read_at`, `archived_at` | Solo entrenador → alumno; no existe endpoint de respuesta. |
-| `audit_logs`         | `id`, `tenant_id`, `actor_user_id`, `action`, `entity_type`, `entity_id`, `metadata`, `created_at`             | Solo inserción. Sin datos sensibles en `metadata`.         |
-| Tablas de la cola    | gestionadas por `pg-boss` / `graphile-worker`                                                                  | Esquema propio.                                            |
+| Tabla                      | Columnas principales                                                                                           | Notas                                                            |
+| -------------------------- | -------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| `announcements`            | `id`, `tenant_id`, `author_user_id`, `title`, `body`, `published_at`, `archived_at`                            | Aviso único por publicación. Borrador si `published_at` es nulo. |
+| `announcement_reads`       | `announcement_id`, `membership_id`, `read_at`                                                                  | Primera lectura por membresía.                                   |
+| `direct_messages`          | `id`, `tenant_id`, `sender_user_id`, `recipient_membership_id`, `body`, `created_at`, `read_at`, `archived_at` | Solo entrenador → alumno; el cuerpo no se edita.                 |
+| `push_devices`             | cuenta, reino, plataforma, token, estado                                                                       | Token del dispositivo, no de un tenant.                          |
+| `notification_preferences` | preferencias de push de la cuenta                                                                              | No sustituyen el permiso del sistema.                            |
+| `notification_deliveries`  | cola idempotente por aviso o mensaje, usuario y dispositivo                                                    | Payload genérico. No es la fuente del texto.                     |
+| `audit_logs`               | `id`, `tenant_id`, `actor_user_id`, `action`, `entity_type`, `entity_id`, `metadata`, `created_at`             | Solo inserción. Sin datos sensibles en `metadata`.               |
 
 ### 3.4 Puntos de extensión comercial (verificados contra el modelo)
 
@@ -643,7 +645,7 @@ Cada fase termina con: pruebas en verde, migraciones aplicables desde cero, crit
 | **3. Biblioteca y videos** ✅           | Ejercicios con revisiones, biblioteca global/personal, personalización, subida firmada a RustFS, validación en API (`file-type` + `ffprobe` opcional), dedup, URLs firmadas, UI entrenador. | Suite `test/exercises/phase3` + aislamiento; falsos/grandes rechazados; dedup; aislamiento entre entrenadores/marcas; sin autoplay. |
 | **4. Rutinas versionadas** ✅           | Plantillas, borradores, publicación, asignación, personalización por alumno, `week_index` en días, UI entrenador/alumno; ffprobe obligatorio en media.                                      | Suite `test/routines/phase4` + probe; inmutabilidad; aislamiento entrenadores/alumnos; sin emulador local.                          |
 | **5. Entrenamiento y progreso** ✅      | Sesiones + set logs, sync idempotente, SQLite offline, temporizador, historial/progreso alumno y entrenador. k6 diferido.                                                                   | Suite `test/workouts/phase5`; LWW + `client_id`; aislamiento; sin emulador local.                                                   |
-| **6. Avisos, mensajes y contacto**      | Avisos, mensajes individuales, WhatsApp, push opcional.                                                                                                                                     | Un alumno no puede enviar mensajes; visibilidad solo para alumnos activos.                                                          |
+| **6. Avisos, mensajes y contacto** ✅   | Avisos, mensajes individuales, WhatsApp, cola de push con adaptador mock/Expo.                                                                                                              | Un alumno no puede enviar mensajes; visibilidad solo para alumnos activos. Push real pendiente de credenciales.                     |
 | **7. Endurecimiento y beta de PupiApp** | Backups con restauración probada, observabilidad, accesibilidad, checklist de tiendas, hosting aprobado, prueba cerrada en Google Play (12 testers, 14 días).                               | Simulacro de restauración aprobado; revisión de seguridad; checklist de publicación completo.                                       |
 | Posteriores                             | Panel administrativo, web comercial, facturación, referidos, acuerdos, directorio, atribución.                                                                                              | Requieren las decisiones de la sección 9.                                                                                           |
 
