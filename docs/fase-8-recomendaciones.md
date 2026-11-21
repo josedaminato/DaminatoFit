@@ -9,7 +9,8 @@ Un entrenador puede recomendar un negocio, producto, servicio o profesional por 
 En **Mis recomendaciones**:
 
 - crear, editar, publicar, ocultar, reordenar y archivar;
-- elegir categoría, nombre, descripción, imagen opcional ya subida al espacio, enlace y matrícula opcional;
+- elegir categoría, nombre, descripción, enlace y matrícula opcional;
+- asociar una imagen ya subida al espacio (`imageMediaId`, propósito `recommendation`). La pantalla todavía no incluye el selector de archivo; si la API devuelve una URL firmada, la tarjeta la muestra.
 - si declara un beneficio: texto, código, condiciones y fecha de fin.
 
 Estados: `draft`, `published`, `hidden`, `archived`. Archivar no borra la fila si hubo denuncias. No hay borrado físico desde la app.

@@ -5,7 +5,7 @@ import {
   type RecommendationDestination,
 } from '@daminatofit/contracts';
 import { useState } from 'react';
-import { Linking, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Image, Linking, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useBrand } from '@/brand/BrandProvider';
 import type { RecommendationItem } from './api';
 import { copyText } from './copy-text';
@@ -44,6 +44,13 @@ export function RecommendationCard({
         },
       ]}
     >
+      {item.imageUrl ? (
+        <Image
+          accessibilityLabel={`Imagen de ${item.name}`}
+          source={{ uri: item.imageUrl }}
+          style={styles.image}
+        />
+      ) : null}
       <Text style={{ color: colors.text, fontFamily: fontFamily?.bold, fontWeight: '700' }}>
         {item.name}
       </Text>
@@ -132,6 +139,7 @@ export function WhatsappDraft({ item }: { item: RecommendationItem }) {
 
 const styles = StyleSheet.create({
   card: { borderWidth: StyleSheet.hairlineWidth, padding: 14, gap: 8 },
+  image: { width: 72, height: 72, borderRadius: 8 },
   row: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 12 },
   stack: { gap: 8 },
   input: { borderWidth: 1, borderRadius: 10, minHeight: 80, padding: 12, fontSize: 16 },

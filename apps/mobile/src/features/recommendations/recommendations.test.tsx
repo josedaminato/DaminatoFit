@@ -70,6 +70,7 @@ describe('recommendation cards', () => {
       </>,
     );
     expect(screen.getByText('MARTIN15')).toBeTruthy();
+    expect(screen.queryByLabelText('Imagen de Tienda ficticia')).toBeNull();
     expect(screen.getByText(/no las certifica/i)).toBeTruthy();
     expect(screen.getByTestId('whatsapp-draft').props.value).toContain('MARTIN15');
     expect(screen.getByTestId('whatsapp-draft').props.value).toContain('Martín González');
@@ -95,11 +96,13 @@ describe('recommendation cards', () => {
           benefitDescription: 'el descuento del 15 %',
           destinationKind: 'website',
           destinationUrl: 'https://tienda.example',
+          imageUrl: 'https://media.example/logo.png',
         })}
       />,
       'pupiapp',
     );
     expect(screen.queryByText('MARTIN15')).toBeNull();
+    expect(screen.getByLabelText('Imagen de Tienda ficticia')).toBeTruthy();
     expect(screen.getByText(/ya venció/i)).toBeTruthy();
     expect(screen.getByText('Tienda ficticia').props.style).toEqual(
       expect.objectContaining({ color: pupi.colors.light.text }),
