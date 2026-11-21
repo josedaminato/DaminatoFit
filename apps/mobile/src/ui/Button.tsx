@@ -16,7 +16,7 @@ export const Button = forwardRef<React.ElementRef<typeof Pressable>, ButtonProps
   { label, onPress, disabled, loading, variant = 'primary', accessibilityHint },
   ref,
 ) {
-  const { colors } = useBrand();
+  const { colors, layout, fontFamily } = useBrand();
   const isDisabled = disabled || loading;
 
   let backgroundColor = colors.primary;
@@ -47,6 +47,7 @@ export const Button = forwardRef<React.ElementRef<typeof Pressable>, ButtonProps
         {
           backgroundColor,
           borderColor,
+          borderRadius: layout?.radiusMd ?? 10,
           opacity: isDisabled ? 0.5 : pressed ? 0.85 : 1,
         },
       ]}
@@ -54,7 +55,14 @@ export const Button = forwardRef<React.ElementRef<typeof Pressable>, ButtonProps
       {loading ? (
         <ActivityIndicator color={textColor} />
       ) : (
-        <Text style={[styles.label, { color: textColor }]}>{label}</Text>
+        <Text
+          style={[
+            styles.label,
+            { color: textColor, fontFamily: fontFamily?.bold ?? fontFamily?.medium },
+          ]}
+        >
+          {label}
+        </Text>
       )}
     </Pressable>
   );

@@ -13,6 +13,7 @@ export const tenants = pgTable('tenants', {
     .notNull()
     .references(() => users.id),
   branding: jsonb('branding').$type<Record<string, unknown>>().notNull().default({}),
+  logoMediaId: uuid('logo_media_id'),
   storageQuotaBytes: bigint('storage_quota_bytes', { mode: 'number' }),
   status: text('status').notNull().default('active'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),

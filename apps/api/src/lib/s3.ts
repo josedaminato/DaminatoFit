@@ -27,8 +27,9 @@ export function incomingKey(tenantId: string, assetId: string): string {
   return `incoming/${tenantId}/${assetId}`;
 }
 
-export function readyKey(tenantId: string, assetId: string): string {
-  return `tenants/${tenantId}/media/${assetId}/original.mp4`;
+export function readyKey(tenantId: string, assetId: string, ext = 'mp4'): string {
+  const safe = ext.replace(/[^a-z0-9]/gi, '').toLowerCase() || 'bin';
+  return `tenants/${tenantId}/media/${assetId}/original.${safe}`;
 }
 
 export function globalReadyKey(assetId: string): string {

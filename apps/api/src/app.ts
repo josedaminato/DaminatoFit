@@ -11,6 +11,7 @@ import { invitationsRoutes } from './modules/invitations/invitations.routes';
 import { meRoutes } from './modules/me/me.routes';
 import { exercisesRoutes } from './modules/exercises/exercises.routes';
 import { mediaRoutes } from './modules/media/media.routes';
+import { appearanceRoutes } from './modules/appearance/appearance.routes';
 import { routinesRoutes } from './modules/routines/routines.routes';
 import { progressRoutes } from './modules/workouts/progress.routes';
 import { workoutsRoutes } from './modules/workouts/workouts.routes';
@@ -91,6 +92,12 @@ export async function buildApp(
   await app.register(progressRoutes, {
     auths,
     appSql: appDb.sql,
+  });
+  await app.register(appearanceRoutes, {
+    auths,
+    appSql: appDb.sql,
+    migratorSql: migrator.sql,
+    env,
   });
 
   app.addHook('onClose', async () => {

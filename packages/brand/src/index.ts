@@ -4,6 +4,8 @@ import { BRAND_IDS, type BrandConfig, type BrandId, type RealmId } from './types
 
 export * from './types';
 export * from './contrast';
+export * from './appearance/catalog';
+export * from './appearance/tokens';
 
 export const brands: Readonly<Record<BrandId, BrandConfig>> = { daminatofit, pupiapp };
 

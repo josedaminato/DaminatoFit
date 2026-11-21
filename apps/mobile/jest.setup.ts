@@ -17,6 +17,10 @@ jest.mock('expo-haptics', () => ({
   NotificationFeedbackType: { Success: 'success' },
 }));
 
+jest.mock('expo-font', () => ({
+  useFonts: jest.fn(() => [true, null]),
+}));
+
 jest.mock('expo-sqlite', () => ({
   openDatabaseAsync: jest.fn(async () => ({
     execAsync: jest.fn(async () => undefined),

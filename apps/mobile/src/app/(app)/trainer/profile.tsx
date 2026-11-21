@@ -1,5 +1,7 @@
+import { Link } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import { useAppearance } from '@/brand/AppearanceProvider';
 import { useBrand } from '@/brand/BrandProvider';
 import { fetchJson } from '@/lib/api-client';
 import { useSession } from '@/lib/session';
@@ -11,6 +13,7 @@ import { ErrorText } from '@/ui/ErrorText';
 
 export default function TrainerProfileScreen() {
   const { colors } = useBrand();
+  const { editable } = useAppearance();
   const { apiContext, refreshMe } = useSession();
   const [displayName, setDisplayName] = useState('');
   const [bio, setBio] = useState('');
@@ -82,6 +85,11 @@ export default function TrainerProfileScreen() {
           <Text style={{ color: colors.success, fontSize: 16 }}>Perfil guardado.</Text>
         ) : null}
         <Button label="Guardar" onPress={onSave} loading={loading} />
+        {editable ? (
+          <Link href="/trainer/appearance" asChild>
+            <Button label="Personalizar apariencia" variant="secondary" onPress={() => undefined} />
+          </Link>
+        ) : null}
       </View>
     </Screen>
   );

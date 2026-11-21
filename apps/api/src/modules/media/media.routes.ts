@@ -5,6 +5,7 @@ import type { Sql } from 'postgres';
 import { z } from 'zod';
 import type { Env } from '../../config/env';
 import { withTenantContext } from '../../db/tenant-tx';
+import { probeImageBuffer } from '../../lib/image-probe';
 import { probeVideoBuffer } from '../../lib/media-probe';
 import {
   createS3Client,
@@ -20,8 +21,9 @@ import type { AuthInstance } from '../auth/realms';
 import { resolveAuthContext } from '../auth/session';
 
 const RequestUploadSchema = z.object({
-  contentType: z.enum(['video/mp4', 'video/quicktime']),
+  contentType: z.enum(['video/mp4', 'video/quicktime', 'image/jpeg', 'image/png', 'image/webp']),
   declaredSizeBytes: z.number().int().positive(),
+  purpose: z.enum(['video', 'logo']).default('video'),
 });
 
 export async function mediaRoutes(
@@ -42,8 +44,19 @@ export async function mediaRoutes(
     }
     const parsed = RequestUploadSchema.safeParse(request.body);
     if (!parsed.success) return reply.code(400).send({ error: 'invalid_body' });
-    if (parsed.data.declaredSizeBytes > opts.env.MEDIA_MAX_BYTES) {
-      return reply.code(400).send({ error: 'file_too_large', maxBytes: opts.env.MEDIA_MAX_BYTES });
+
+    const isLogo = parsed.data.purpose === 'logo';
+    const kind = isLogo ? 'image' : 'video';
+    if (isLogo && !parsed.data.contentType.startsWith('image/')) {
+      return reply.code(400).send({ error: 'invalid_body' });
+    }
+    if (!isLogo && !parsed.data.contentType.startsWith('video/')) {
+      return reply.code(400).send({ error: 'invalid_body' });
+    }
+
+    const maxBytes = isLogo ? opts.env.MEDIA_LOGO_MAX_BYTES : opts.env.MEDIA_MAX_BYTES;
+    if (parsed.data.declaredSizeBytes > maxBytes) {
+      return reply.code(400).send({ error: 'file_too_large', maxBytes });
     }
 
     const assetId = randomUUID();
@@ -65,7 +78,7 @@ export async function mediaRoutes(
           ) VALUES (
             ${assetId},
             ${auth.membership!.tenantId},
-            'video',
+            ${kind},
             ${key},
             'pending_upload',
             ${parsed.data.declaredSizeBytes},
@@ -81,7 +94,8 @@ export async function mediaRoutes(
       uploadUrl,
       storageKey: key,
       expiresInSeconds: opts.env.MEDIA_UPLOAD_URL_TTL_SECONDS,
-      maxBytes: opts.env.MEDIA_MAX_BYTES,
+      maxBytes,
+      kind,
     };
   });
 
@@ -103,8 +117,8 @@ export async function mediaRoutes(
         role: 'owner',
       },
       async (tx) =>
-        tx<{ id: string; storage_key: string; status: string }[]>`
-          SELECT id, storage_key, status FROM media_assets
+        tx<{ id: string; storage_key: string; status: string; kind: string }[]>`
+          SELECT id, storage_key, status, kind FROM media_assets
           WHERE id = ${assetId} AND tenant_id = ${tenantId}
         `,
     );
@@ -137,15 +151,20 @@ export async function mediaRoutes(
       membership: auth.membership,
     };
 
+    const maxRead =
+      asset.kind === 'image' ? opts.env.MEDIA_LOGO_MAX_BYTES : opts.env.MEDIA_MAX_BYTES;
     let buffer: Buffer;
     try {
-      buffer = await getObjectBytes(s3, opts.env, asset.storage_key, opts.env.MEDIA_MAX_BYTES);
+      buffer = await getObjectBytes(s3, opts.env, asset.storage_key, maxRead);
     } catch {
       await markRejected(opts.appSql, ownerCtx, assetId, 'object_missing_or_too_large');
       return reply.code(400).send({ error: 'upload_incomplete' });
     }
 
-    const probe = await probeVideoBuffer(opts.env, buffer);
+    const isImage = asset.kind === 'image';
+    const probe = isImage
+      ? await probeImageBuffer(opts.env, buffer)
+      : await probeVideoBuffer(opts.env, buffer);
 
     if (!probe.ok) {
       await markRejected(opts.appSql, ownerCtx, assetId, probe.rejectionReason ?? 'rejected');
@@ -158,6 +177,7 @@ export async function mediaRoutes(
       SELECT id, storage_key FROM media_assets
       WHERE tenant_id = ${tenantId}
         AND status = 'ready'
+        AND kind = ${asset.kind}
         AND sha256 = ${probe.sha256}
       LIMIT 1
     `;
@@ -174,7 +194,9 @@ export async function mediaRoutes(
         deduplicated: true,
         sha256: probe.sha256,
         sizeBytes: probe.sizeBytes,
-        durationMs: probe.durationMs,
+        durationMs: 'durationMs' in probe ? probe.durationMs : null,
+        width: probe.width,
+        height: probe.height,
       };
     }
 
@@ -196,7 +218,8 @@ export async function mediaRoutes(
       return reply.code(400).send({ error: 'quota_exceeded', quotaBytes: quota, usedBytes: used });
     }
 
-    const dest = readyKey(tenantId, assetId);
+    const ext = probe.container ?? (isImage ? 'png' : 'mp4');
+    const dest = readyKey(tenantId, assetId, ext);
     try {
       await moveObject(s3, opts.env, asset.storage_key, dest);
     } catch (error) {
@@ -205,6 +228,13 @@ export async function mediaRoutes(
       return reply.code(500).send({ error: 'storage_error' });
     }
 
+    const videoCodec = isImage
+      ? null
+      : 'videoCodec' in probe
+        ? String(probe.videoCodec ?? '') || null
+        : null;
+    const durationMs = isImage ? null : 'durationMs' in probe ? Number(probe.durationMs) : null;
+
     await opts.migratorSql`
       UPDATE media_assets SET
         status = 'ready',
@@ -212,10 +242,10 @@ export async function mediaRoutes(
         size_bytes = ${probe.sizeBytes},
         sha256 = ${probe.sha256},
         container = ${probe.container},
-        video_codec = ${probe.videoCodec},
+        video_codec = ${videoCodec},
         width = ${probe.width},
         height = ${probe.height},
-        duration_ms = ${probe.durationMs},
+        duration_ms = ${durationMs},
         rejection_reason = NULL,
         updated_at = now()
       WHERE id = ${assetId}
@@ -234,7 +264,9 @@ export async function mediaRoutes(
       deduplicated: false,
       sha256: probe.sha256,
       sizeBytes: probe.sizeBytes,
-      durationMs: probe.durationMs,
+      durationMs,
+      width: probe.width,
+      height: probe.height,
     };
   });
 
@@ -282,6 +314,14 @@ export async function mediaRoutes(
       WHERE video_media_id = ${assetId}
     `;
     if ((refs[0]?.n ?? 0) > 0) {
+      return reply.code(409).send({ error: 'still_referenced' });
+    }
+    const logoRefs = await opts.migratorSql<{ n: number }[]>`
+      SELECT count(*)::int AS n FROM tenants
+      WHERE logo_media_id = ${assetId}
+         OR branding->>'logoMediaId' = ${assetId}
+    `;
+    if ((logoRefs[0]?.n ?? 0) > 0) {
       return reply.code(409).send({ error: 'still_referenced' });
     }
 

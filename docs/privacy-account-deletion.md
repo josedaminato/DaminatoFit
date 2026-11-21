@@ -26,5 +26,6 @@ Documento de producto/técnico. **No constituye asesoramiento legal.** Las oblig
 - Exportación de datos previos a la eliminación.
 - Conservación de facturación / comprobantes cuando existan (Fase comercial).
 - Si un entrenador con alumnos activos debe poder eliminarse sin transferir el espacio (hoy se archiva el espacio).
+- Tratamiento de **logotipos e imágenes UGC** (Fase 5.1): retención al archivar el tenant, derechos de marcas de terceros y textos de tiendas. Ver `docs/fase-5.1-apariencia.md`. La carpeta `docs/publicacion/` aún no existe; al crearla hay que volcar esos pendientes.
 
 Hasta definir esas reglas, no se inventan plazos ni borrados en cascada adicionales.

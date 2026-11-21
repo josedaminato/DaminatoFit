@@ -10,11 +10,19 @@ interface ScreenProps {
 }
 
 export function Screen({ title, children, scroll = true }: ScreenProps) {
-  const { colors } = useBrand();
+  const { colors, layout, fontFamily } = useBrand();
+  const titleStyle = [
+    styles.title,
+    {
+      color: colors.text,
+      fontSize: layout?.titleSize ?? 26,
+      fontFamily: fontFamily?.bold,
+    },
+  ];
   const content = (
     <View style={styles.inner}>
       {title ? (
-        <Text accessibilityRole="header" style={[styles.title, { color: colors.text }]}>
+        <Text accessibilityRole="header" style={titleStyle}>
           {title}
         </Text>
       ) : null}
